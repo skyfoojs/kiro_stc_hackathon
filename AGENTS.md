@@ -76,7 +76,7 @@ Before adding a dependency, check whether the installed ones already cover it. I
 
 - Browser: `createClient` from `@/lib/supabase/client`. Server (components, actions, routes): `createClient` from `@/lib/supabase/server` (async). Don't create ad-hoc clients.
 - `src/proxy.ts` refreshes the auth session (Next 16 renamed `middleware` to `proxy`). Don't rename or remove it.
-- Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are safe in the browser. **Never** use the service-role key in client code.
+- Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are safe in the browser. **Never** use the service-role key in client code.
 - Enable Row Level Security on every table and add policies, even quick ones. Keep the schema in a `supabase/schema.sql` file (or note migrations there) so teammates can reproduce it.
 - On the server, use `supabase.auth.getUser()` for auth checks, not `getSession()`.
 
