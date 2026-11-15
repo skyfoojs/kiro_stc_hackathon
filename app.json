@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "kiro_stc_hackathon",
+    "name": "Relay",
     "slug": "kiro-stc-hackathon",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "kirostchackathon",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "ios": {
       "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.anonymous.kiro-stc-hackathon"
@@ -42,7 +42,9 @@
         {
           "motionPermission": "Allow $(PRODUCT_NAME) to use the barometer to detect which floor you are on."
         }
-      ]
+      ],
+      "expo-audio",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,
