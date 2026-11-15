@@ -39,19 +39,19 @@ export default function FloorPanel({ towerId, onTower, floors, summaries, totals
       </div>
 
       <div className="b3d-totals" aria-label="Building occupancy">
-        <span className="b3d-count c-wait">
+        <span className="b3d-count">
           <Icon name="wait" size={16} color="var(--b3d-wait)" />
           <b className="tab">{totals.waiting}</b> waiting
         </span>
-        <span className="b3d-count c-safe">
+        <span className="b3d-count">
           <Icon name="safe" size={16} color="var(--b3d-safe)" />
           <b className="tab">{totals.safe}</b> safe
         </span>
-        <span className="b3d-count c-unacc">
+        <span className="b3d-count">
           <Icon name="unacc" size={16} color="var(--b3d-unacc)" />
           <b className="tab">{totals.unacc}</b> unaccounted
         </span>
-        <span className="b3d-count c-active">
+        <span className="b3d-count">
           <Icon name="eye" size={16} color="var(--b3d-active)" />
           <b className="tab">{totals.active}</b> inside, updating
         </span>

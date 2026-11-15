@@ -134,7 +134,7 @@ export class BuildingScene {
   private explode = 0;
   private explodeFloor = 1;
   private raf = 0;
-  private clock = new THREE.Clock();
+  private lastFrame = performance.now();
   private elapsed = 0;
   private tween: { from: [THREE.Vector3, THREE.Vector3]; to: [THREE.Vector3, THREE.Vector3]; t: number } | null = null;
   private ro: ResizeObserver;
@@ -201,7 +201,8 @@ export class BuildingScene {
 
   resetCamera(instant = false) {
     const h = this.towerHeight();
-    this.moveCamera(new THREE.Vector3(0, h * 0.42, 0), new THREE.Vector3(h * 0.95, h * 0.62, h * 1.15), instant);
+    // Far enough back to see the whole tower plus the assembly point in front of it.
+    this.moveCamera(new THREE.Vector3(0, h * 0.4, 4), new THREE.Vector3(h * 1.3, h * 0.75, h * 1.75), instant);
   }
 
   focusFloor(f: number) {
@@ -805,7 +806,9 @@ export class BuildingScene {
 
   private loop = () => {
     this.raf = requestAnimationFrame(this.loop);
-    const dt = Math.min(0.1, this.clock.getDelta());
+    const nowMs = performance.now();
+    const dt = Math.min(0.1, (nowMs - this.lastFrame) / 1000);
+    this.lastFrame = nowMs;
     this.elapsed += dt;
     const v = this.view;
 
