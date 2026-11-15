@@ -12,7 +12,7 @@ const SHORT: Record<AccountId, string> = { hasnah: 'Hasnah', razak: 'Captain Raz
 function TowersArt() {
   return (
     <svg viewBox="0 0 420 300" style={{ width: '100%', maxWidth: 440 }} role="img" aria-label="The four towers of The Vertical, Bangsar South">
-      <g fill="none" stroke="#C9D4DF" strokeWidth="2">
+      <g fill="none" stroke="#A88E82" strokeWidth="2">
         <rect x="20" y="70" width="70" height="210" rx="4" />
         <rect x="5" y="230" width="100" height="50" rx="4" />
         <rect x="120" y="90" width="66" height="190" rx="4" />
@@ -21,8 +21,8 @@ function TowersArt() {
         <rect x="326" y="20" width="76" height="260" rx="4" />
         <path d="M0 281h420" />
       </g>
-      <rect x="232" y="120" width="54" height="10" rx="2" fill="#FF5A1F" />
-      <text x="259" y="296" fill="#C9D4DF" fontSize="13" textAnchor="middle" fontFamily="inherit">
+      <rect x="232" y="120" width="54" height="10" rx="2" fill="#F6AA1C" />
+      <text x="259" y="296" fill="#C9B3A8" fontSize="13" textAnchor="middle" fontFamily="inherit">
         UOA Corporate Tower
       </text>
     </svg>

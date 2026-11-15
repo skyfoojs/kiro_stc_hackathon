@@ -167,7 +167,7 @@ export class BuildingScene {
     this.controls.addEventListener('change', () => this.clampTarget());
 
     this.scene.add(new THREE.AmbientLight('#ffffff', 0.8));
-    const sun = new THREE.DirectionalLight('#cfe0ff', 0.9);
+    const sun = new THREE.DirectionalLight('#ffe6d6', 0.9);
     sun.position.set(30, 60, 40);
     this.scene.add(sun);
     this.scene.fog = new THREE.Fog(VIZ.bg, 140, 320);
@@ -292,13 +292,13 @@ export class BuildingScene {
   // ---------- static scene ----------
 
   private buildGround() {
-    const grid = new THREE.GridHelper(140, 70, '#1d2b45', '#14203a');
+    const grid = new THREE.GridHelper(140, 70, '#3a2016', '#26140c');
     grid.position.y = -0.03;
     this.scene.add(grid);
 
     const road = new THREE.Line(
       new THREE.BufferGeometry().setFromPoints([ROAD_START, ROAD_MID, ACCESS_POINT].map((p) => new THREE.Vector3(p.x, 0.01, p.z))),
-      line('#3a5170', 0.9),
+      line('#7a5444', 0.9),
     );
     this.scene.add(road);
 
@@ -352,7 +352,7 @@ export class BuildingScene {
     );
     shell.scale.set(PLATE_W + 0.3, 1, PLATE_D + 0.3);
     add(shell);
-    const shellEdges = new THREE.LineSegments(UNIT_EDGES, line('#5d8fd6', 0.75));
+    const shellEdges = new THREE.LineSegments(UNIT_EDGES, line('#c07a5a', 0.75));
     shellEdges.scale.copy(shell.scale);
     add(shellEdges);
 
@@ -366,9 +366,9 @@ export class BuildingScene {
     }
     const mullGeo = new THREE.BufferGeometry();
     mullGeo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-    add(new THREE.LineSegments(mullGeo, line('#2f4f80', 0.45)));
+    add(new THREE.LineSegments(mullGeo, line('#7a4330', 0.45)));
 
-    const core = new THREE.Mesh(UNIT_BOX, basic('#26385a', 0.25));
+    const core = new THREE.Mesh(UNIT_BOX, basic('#4a2a1e', 0.3));
     core.scale.set(CORE.w, 1, CORE.d);
     core.position.set(CORE.x, 0, CORE.z);
     add(core);
@@ -399,7 +399,7 @@ export class BuildingScene {
       [0, -PLATE_D / 2],
       [0, PLATE_D / 2],
     ]) {
-      const c = new THREE.Mesh(UNIT_BOX, basic('#3c5a88', 0.35));
+      const c = new THREE.Mesh(UNIT_BOX, basic('#8a5440', 0.4));
       c.scale.set(0.22, 1, 0.22);
       c.position.set(x, 0, z);
       add(c);

@@ -21,40 +21,40 @@ function FloorPlate({ n, floor, tower }: { n: MarkerNames; floor: number; tower:
       role="img"
       aria-label={`Level ${floor} floor plan, ${tower}. Central core with lifts. ${n.a} north-west of the core, ${n.b} south-east with the ${n.wait} beside it, ${n.lift} east of the core. ${n.asm} is outside, south of the tower.`}
       style={{ width: '100%', height: 'auto', fontFamily: 'inherit' }}>
-      <rect x="20" y="20" width="720" height="380" rx="18" fill="#F3F6F9" stroke="#14213D" strokeWidth="3" />
-      <g stroke="#C9D4DF" strokeWidth="2" fill="none">
+      <rect x="20" y="20" width="720" height="380" rx="18" fill="#FAF8F7" stroke="#220901" strokeWidth="3" />
+      <g stroke="#D8CFC9" strokeWidth="2" fill="none">
         <path d="M20 140h170M570 140h170M20 280h170M570 280h170M190 20v120M570 20v120M190 280v120M570 280v120" />
       </g>
-      <text x="105" y="88" fontSize="15" fill="#4B5B78" textAnchor="middle">Tenant zone</text>
-      <text x="655" y="88" fontSize="15" fill="#4B5B78" textAnchor="middle">Tenant zone</text>
-      <text x="105" y="345" fontSize="15" fill="#4B5B78" textAnchor="middle">Tenant zone</text>
-      <text x="655" y="345" fontSize="15" fill="#4B5B78" textAnchor="middle">Tenant zone</text>
-      <rect x="270" y="150" width="220" height="120" rx="8" fill="#E5ECF2" stroke="#4B5B78" strokeWidth="2" />
-      <text x="380" y="215" fontSize="15" fill="#4B5B78" textAnchor="middle">Core and lifts</text>
+      <text x="105" y="88" fontSize="15" fill="#6B5C55" textAnchor="middle">Tenant zone</text>
+      <text x="655" y="88" fontSize="15" fill="#6B5C55" textAnchor="middle">Tenant zone</text>
+      <text x="105" y="345" fontSize="15" fill="#6B5C55" textAnchor="middle">Tenant zone</text>
+      <text x="655" y="345" fontSize="15" fill="#6B5C55" textAnchor="middle">Tenant zone</text>
+      <rect x="270" y="150" width="220" height="120" rx="8" fill="#F0ECE9" stroke="#6B5C55" strokeWidth="2" />
+      <text x="380" y="215" fontSize="15" fill="#6B5C55" textAnchor="middle">Core and lifts</text>
       <g>
-        <rect x="232" y="122" width="36" height="36" fill="#14213D" />
+        <rect x="232" y="122" width="36" height="36" fill="#220901" />
         <text x="250" y="146" fontSize="16" fontWeight="800" fill="#fff" textAnchor="middle">A</text>
-        <text x="250" y="112" fontSize="14" fontWeight="700" fill="#14213D" textAnchor="middle">{n.a}</text>
+        <text x="250" y="112" fontSize="14" fontWeight="700" fill="#220901" textAnchor="middle">{n.a}</text>
       </g>
       <g>
-        <rect x="492" y="262" width="36" height="36" fill="#14213D" />
+        <rect x="492" y="262" width="36" height="36" fill="#220901" />
         <text x="510" y="286" fontSize="16" fontWeight="800" fill="#fff" textAnchor="middle">B</text>
-        <text x="510" y="318" fontSize="14" fontWeight="700" fill="#14213D" textAnchor="middle">{n.b}</text>
+        <text x="510" y="318" fontSize="14" fontWeight="700" fill="#220901" textAnchor="middle">{n.b}</text>
       </g>
       <g>
-        <path d="M520 192l18 18-18 18-18-18z" fill="#14213D" />
+        <path d="M520 192l18 18-18 18-18-18z" fill="#220901" />
         <text x="520" y="215" fontSize="13" fontWeight="800" fill="#fff" textAnchor="middle">L</text>
-        <text x="548" y="196" fontSize="14" fontWeight="700" fill="#14213D">{n.lift}</text>
+        <text x="548" y="196" fontSize="14" fontWeight="700" fill="#220901">{n.lift}</text>
       </g>
       <g>
-        <circle cx="430" cy="300" r="18" fill="#14213D" />
+        <circle cx="430" cy="300" r="18" fill="#220901" />
         <text x="430" y="305" fontSize="15" fontWeight="800" fill="#fff" textAnchor="middle">W</text>
-        <text x="430" y="338" fontSize="14" fontWeight="700" fill="#14213D" textAnchor="middle">{n.wait}</text>
+        <text x="430" y="338" fontSize="14" fontWeight="700" fill="#220901" textAnchor="middle">{n.wait}</text>
       </g>
-      <path d="M380 400v52" stroke="#14213D" strokeWidth="3" strokeDasharray="6 6" />
+      <path d="M380 400v52" stroke="#220901" strokeWidth="3" strokeDasharray="6 6" />
       <g>
-        <path d="M366 456h28l-6 10 6 10h-28z" fill="#14213D" />
-        <text x="404" y="472" fontSize="14" fontWeight="700" fill="#14213D">{n.asm} (ground level, outside)</text>
+        <path d="M366 456h28l-6 10 6 10h-28z" fill="#220901" />
+        <text x="404" y="472" fontSize="14" fontWeight="700" fill="#220901">{n.asm} (ground level, outside)</text>
       </g>
     </svg>
   );

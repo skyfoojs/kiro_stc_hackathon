@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay Command</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --esp:#220901;--brown:#621708;--red:#941B0C;--orange:#BC3908;--amber:#F6AA1C;
+  --bg:#F5F3F1;--surface:#fff;--sub:#FAF8F7;--line:#E8E2DD;--line2:#D8CFC9;
+  --text:#220901;--muted:#6B5C55;
+  --safe:#1E7A4C;--safe-bg:#E5F2EA;--wait-bg:#FEF4DC;--unacc-bg:#FBEAE7;
+  --brown-bg:#F6ECE8;--orange-bg:#FCEEE7;--neutral-bg:#F0ECE9;
+  --r:10px;--r-sm:7px;
+  --sh:0 1px 2px rgba(34,9,1,.05),0 1px 3px rgba(34,9,1,.04);
+  --sh-lg:0 16px 40px rgba(34,9,1,.18);
+  --side:240px;--hdr:60px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:Inter,"Atkinson Hyperlegible Next",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.45;color:var(--text);background:var(--bg);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,p{margin:0}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--esp);outline-offset:2px;border-radius:4px}
+.side :focus-visible,.banner :focus-visible,.login-brand :focus-visible{outline-color:var(--amber)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ic{flex:none;display:block}
+
+/* Shell */
+.app{display:grid;grid-template-columns:var(--side) minmax(0,1fr);height:100vh}
+.side{background:var(--esp);color:#E9DAD2;display:flex;flex-direction:column;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:11px;padding:18px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.bname{font-weight:800;font-size:17px;color:#fff;letter-spacing:-.01em}
+.bsub{font-size:11.5px;color:#C9B3A8;font-weight:600;letter-spacing:.04em}
+.side nav{padding:12px 10px;flex:1}
+.side ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.nav{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:8px;text-decoration:none;color:#E2D1C8;font-weight:500;font-size:13.5px;background:none;border:0;width:100%;text-align:left;cursor:pointer;position:relative}
+.nav:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav.on{background:var(--brown);color:#fff;font-weight:600}
+.nav.on::before{content:"";position:absolute;left:-10px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--amber)}
+.nav .lk{margin-left:auto;opacity:.6}
+.nav .nb{margin-left:auto;background:var(--orange);color:#fff;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px}
+.nav-sec{font-size:11px;font-weight:600;color:#A88E82;padding:14px 12px 6px;letter-spacing:.04em}
+.side-ft{padding:10px;border-top:1px solid rgba(255,255,255,.08)}
+.nav.sm{font-size:12.5px;padding:7px 12px;color:#CDB8AD}
+.mainwrap{display:flex;flex-direction:column;min-width:0;height:100vh}
+.hdr{height:var(--hdr);flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--line)}
+.hdr-l{display:flex;align-items:center;gap:14px;min-width:0}
+.hdr h1{font-size:18px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+.hdr-r{display:flex;align-items:center;gap:14px}
+.pill{display:inline-flex;align-items:center;gap:7px;height:26px;padding:0 10px;border-radius:999px;font-size:12.5px;font-weight:600;background:var(--neutral-bg);white-space:nowrap}
+.pill.live{background:var(--orange-bg);color:var(--red)}
+.pill .d{width:8px;height:8px;border-radius:50%;background:currentColor}
+.pill.live .d{background:var(--orange);box-shadow:0 0 0 3px rgba(188,57,8,.18)}
+.upd{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:12.5px;white-space:nowrap}
+.upd b{color:var(--text);font-weight:600}
+.role-sw{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.role-sw select{height:34px;border:1px solid var(--line2);border-radius:8px;padding:0 30px 0 10px;background:var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23220901' stroke-width='2.4'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;appearance:none;font-weight:600;color:var(--text);cursor:pointer}
+.icon-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;cursor:pointer;position:relative}
+.icon-btn:hover{background:var(--sub)}
+.icon-btn .dot{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;border-radius:9px;background:var(--orange);color:#fff;font-size:10.5px;font-weight:700;display:grid;place-items:center;padding:0 4px;border:2px solid #fff}
+.notif{position:relative}
+.npanel{position:absolute;right:0;top:44px;width:360px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh-lg);z-index:40;overflow:hidden}
+.npanel h3{font-size:13px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.npanel ol{list-style:none;margin:0;padding:0;max-height:360px;overflow:auto}
+.npanel li{padding:10px 14px;border-bottom:1px solid var(--line);font-size:12.5px}
+.npanel li b{display:block;font-size:12.5px}
+.npanel time{color:var(--muted);font-size:11.5px}
+.user{display:flex;align-items:center;gap:9px;padding-left:14px;border-left:1px solid var(--line)}
+.user b{display:block;font-size:13px;font-weight:600;line-height:1.2}
+.user small{color:var(--muted);font-size:11.5px}
+.av{width:32px;height:32px;border-radius:50%;background:var(--brown);color:#fff;font-weight:700;font-size:12px;display:grid;place-items:center;flex:none}
+.av.bomba{background:var(--red)}
+.scroll{flex:1;overflow:auto;outline:none}
+.page{padding:20px 24px 36px;max-width:1760px;margin:0 auto}
+
+/* Banner */
+.banner{flex:none;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:12px 24px;background:var(--orange);color:#fff}
+.banner.ended{background:var(--esp)}
+.bn-main{display:flex;align-items:center;gap:14px;min-width:0}
+.bn-ic{width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,.16);display:grid;place-items:center;flex:none}
+.bn-type{font-size:19px;font-weight:800;letter-spacing:-.01em;line-height:1.15}
+.bn-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:13px;font-weight:500;opacity:.95;margin-top:2px}
+.bn-meta i{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.6)}
+.bn-stats{display:flex;align-items:center;gap:22px}
+.bn-stats small{display:block;font-size:11px;font-weight:600;opacity:.85;letter-spacing:.02em}
+.bn-stats b{display:flex;align-items:center;gap:6px;font-size:15px;font-weight:700;white-space:nowrap}
+.live-dot{width:9px;height:9px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 3px rgba(246,170,28,.3)}
+.btn.bn-btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
+.btn.bn-btn:hover{background:rgba(255,255,255,.12)}
+
+/* Grid and cards */
+.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;align-items:start}
+.c3{grid-column:span 3}.c4{grid-column:span 4}.c5{grid-column:span 5}.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c12{grid-column:span 12}
+.stretch{align-self:stretch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);min-width:0}
+.card-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 16px 12px;border-bottom:1px solid var(--line)}
+.card-h h2{font-size:15px;font-weight:700;letter-spacing:-.005em}
+.card-h .sub,.sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+.card-b{padding:14px 16px}
+.card-f{padding:10px 16px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fine{font-size:12px;color:var(--muted)}
+.lnk{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;font-weight:600;color:var(--brown);text-decoration:none;background:none;border:0;padding:2px 0;cursor:pointer}
+.lnk:hover{text-decoration:underline}
+.page-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:16px}
+.page-h h2{font-size:20px;font-weight:700;letter-spacing:-.01em}
+.ph-act{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:36px;padding:0 14px;border-radius:8px;border:1px solid var(--line2);background:var(--surface);color:var(--text);font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;text-decoration:none}
+.btn:hover{background:var(--sub);border-color:#C9BDB5}
+.btn.primary{background:var(--brown);border-color:var(--brown);color:#fff}
+.btn.primary:hover{background:#4E1206}
+.btn.urgent{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn.urgent:hover{background:#A33106}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.ghost:hover{background:var(--neutral-bg)}
+.btn.sm{height:30px;padding:0 10px;font-size:12.5px}
+.btn.xs{height:26px;padding:0 9px;font-size:12px;border-radius:6px}
+.btn.lg{height:44px;padding:0 18px;font-size:14px}
+.btn.block{width:100%}
+.btn[disabled],.btn[aria-disabled=true]{background:var(--neutral-bg);border-color:var(--line);color:#8C7F79;cursor:not-allowed}
+.why{font-size:12px;color:var(--muted)}
+
+/* Chips */
+.chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px 0 4px;border-radius:999px;font-size:12px;font-weight:600;color:var(--esp);background:var(--neutral-bg);white-space:nowrap;border:1px solid transparent}
+.chip .ci{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:#7E716B;color:#fff}
+.chip .ci .ic{stroke-width:2.8}
+.chip.safe{background:var(--safe-bg)}.chip.safe .ci{background:var(--safe)}
+.chip.wait{background:var(--wait-bg)}.chip.wait .ci{background:var(--amber);color:var(--esp)}
+.chip.unacc{background:var(--unacc-bg)}.chip.unacc .ci{background:var(--red)}
+.chip.t-brown{background:var(--brown-bg)}.chip.t-brown .ci{background:var(--brown)}
+.chip.t-info{background:#F3EEEB}.chip.t-info .ci{background:#5E4A41}
+.chip.urgent{background:var(--orange-bg);border-color:rgba(188,57,8,.45);color:var(--red)}.chip.urgent .ci{background:var(--orange)}
+.chip.plain{padding:0 9px}
+.tag{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:6px;font-size:11.5px;font-weight:600;background:var(--neutral-bg);color:var(--esp);white-space:nowrap}
+.tag.fire{background:var(--unacc-bg);color:var(--red)}
+.tag.brown{background:var(--brown-bg);color:var(--brown)}
+.tag.ai{background:var(--esp);color:#fff}
+.tag.amber{background:var(--wait-bg);color:#6B4500}
+.tag.orange{background:var(--orange);color:#fff}
+
+/* Stat cards */
+.stat{padding:14px 16px;position:relative;overflow:hidden;align-self:stretch;transition:box-shadow .3s}
+.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:#8C7F79}
+.stat.wait::before{background:var(--amber)}.stat.safe::before{background:var(--safe)}.stat.unacc::before{background:var(--red)}
+.stat-top{display:flex;align-items:center;gap:9px}
+.stat-ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:#fff}
+.stat.wait .stat-ic{background:var(--amber);color:var(--esp)}.stat.safe .stat-ic{background:var(--safe)}.stat.unacc .stat-ic{background:var(--red)}
+.stat-l{font-weight:600;font-size:13.5px}
+.stat-n{font-size:40px;font-weight:800;letter-spacing:-.02em;line-height:1;margin:10px 0 6px}
+.stat.safe .stat-n{color:var(--safe)}.stat.unacc .stat-n{color:var(--red)}
+.stat-d{font-size:12.5px;color:var(--muted)}
+.stat.bump{box-shadow:inset 0 0 0 2px var(--amber),var(--sh)}
+.stat .chg{position:absolute;top:12px;right:12px}
+.bsum{padding:14px 16px;align-self:stretch;display:flex;flex-direction:column;gap:10px}
+.bs-h{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--neutral-bg)}
+.bar span{display:block;height:100%}
+.bar .w{background:var(--amber)}.bar .s{background:var(--safe)}
+.bar .u{background:repeating-linear-gradient(135deg,var(--red) 0 4px,#B23A2A 4px 8px)}
+.bs-dl{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin:0}
+.bs-dl dt{font-size:11.5px;color:var(--muted)}
+.bs-dl dd{margin:0;font-weight:700;font-size:13.5px}
+.src{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted)}
+.src .d{width:7px;height:7px;border-radius:50%;background:#A99C96}
+.src.on .d{background:var(--safe)}
+
+/* Plan */
+.plan{display:flex;flex-direction:column}
+.plan-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 18px 10px}
+.plan-ttl{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.plan-ttl h2{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.plan-meta{font-size:12px;color:var(--muted);white-space:nowrap;text-align:right}
+.plan-meta b{color:var(--text)}
+.plan-sub{padding:0 18px 10px;font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.plan-lines{list-style:none;margin:0;padding:0 10px;display:flex;flex-direction:column;gap:2px}
+.pl{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:9px 8px;border-radius:8px;transition:background .4s}
+.pl .n{width:26px;height:26px;border-radius:7px;background:var(--brown-bg);color:var(--brown);font-weight:800;font-size:13px;display:grid;place-items:center}
+.pl .tx{font-size:14.5px;line-height:1.5;padding-top:2px}
+.pl .tx .tags{display:inline-flex;gap:6px;margin-left:6px;vertical-align:1px}
+.pl.flash{background:var(--wait-bg);box-shadow:inset 3px 0 var(--amber)}
+.pl.issue{background:var(--unacc-bg)}
+.pl .iss{display:flex;gap:6px;align-items:flex-start;color:var(--red);font-size:12.5px;font-weight:600;margin-top:4px}
+.pl textarea{width:100%;min-height:44px;resize:vertical;border:1px solid var(--line2);border-radius:7px;padding:7px 9px;font-size:14px;line-height:1.45;background:#fff}
+.pl textarea:focus{outline:2px solid var(--esp);outline-offset:0;border-color:var(--esp)}
+.pl .edrow{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+.decide{margin:8px 0 2px;padding:10px 12px;border:1px dashed var(--line2);border-radius:8px;background:var(--sub)}
+.decide legend{font-size:12px;font-weight:700;padding:0 4px}
+.decide .opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.opt{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 12px;border:1px solid var(--line2);border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13px}
+.opt:has(input:checked){border-color:var(--brown);background:var(--brown-bg)}
+.opt input{accent-color:var(--brown);margin:0}
+.decide .why{margin-top:6px;display:block}
+.disc{display:flex;gap:8px;align-items:flex-start;margin:10px 18px 0;padding:9px 11px;border-radius:8px;background:var(--sub);border:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.disc b{color:var(--text);font-weight:600}
+.plan-ft{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px 14px;flex-wrap:wrap}
+.plan-ft .acts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.reply-box{margin:10px 18px 0;padding:10px 12px;border-radius:8px;background:var(--brown-bg);font-size:13px;display:flex;gap:8px;align-items:flex-start}
+.reply-btns{display:flex;gap:8px;flex-wrap:wrap}
+.reply-btns .btn[aria-pressed=true]{background:var(--brown);border-color:var(--brown);color:#fff}
+.note-in{width:100%;border:1px solid var(--line2);border-radius:8px;padding:8px 10px;margin-top:8px;min-height:56px;resize:vertical}
+.empty{padding:36px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
+.empty .em-ic{width:48px;height:48px;border-radius:12px;background:var(--neutral-bg);display:grid;place-items:center;color:var(--brown);margin-bottom:4px}
+.empty h2,.empty h3{font-size:16px}
+.empty p{color:var(--muted);max-width:440px}
+
+/* Teams list */
+.tlist{list-style:none;margin:0;padding:4px 0}
+.trow{display:flex;justify-content:space-between;gap:10px;padding:9px 16px;border-bottom:1px solid var(--line)}
+.trow:last-child{border-bottom:0}
+.trow b{font-size:13px;font-weight:600;display:block}
+.tr-msg{display:block;font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.tr-main{min-width:0;flex:1}
+.tr-side{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex:none}
+.tr-side small{font-size:11.5px;color:var(--muted);font-weight:600}
+
+/* Tables */
+.tbl-wrap{overflow:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;font-weight:600;font-size:12px;color:var(--muted);padding:9px 12px;background:var(--sub);border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0;z-index:1}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .r{text-align:right}
+.tbl tbody tr.click{cursor:pointer}
+.tbl tbody tr.click:hover td{background:var(--sub)}
+.tbl tbody tr.sel td{background:var(--brown-bg)}
+.tbl tbody tr.sel td:first-child{box-shadow:inset 3px 0 var(--brown)}
+.cn{display:inline-flex;align-items:center;gap:5px;font-weight:700;justify-content:flex-end}
+.cn .d{width:8px;height:8px;border-radius:2px}
+.cn.wait .d{background:var(--amber)}.cn.safe .d{background:var(--safe)}.cn.unacc .d{background:var(--red)}
+.cn.zero{color:#9A8D87;font-weight:500}
+.cn.zero .d{display:none}
+.fl{font-weight:700}
+.tbl-sec td{background:var(--sub);font-size:11.5px;font-weight:600;color:var(--muted);padding:6px 12px}
+
+/* People panel */
+.ppl-body{max-height:440px;overflow:auto}
+.grp-h{display:flex;align-items:center;justify-content:space-between;padding:9px 16px 5px;font-size:12px;font-weight:700;color:var(--muted)}
+.grp-toggle{display:flex;width:100%;align-items:center;justify-content:space-between;padding:10px 16px;border:0;border-top:1px solid var(--line);background:none;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer}
+.grp-toggle:hover{background:var(--sub)}
+.grp-toggle .ic{transition:transform .2s}
+.grp-toggle[aria-expanded=true] .ic{transform:rotate(180deg)}
+.prow{display:flex;align-items:center;gap:8px;padding:0 12px 0 0;border-left:3px solid transparent}
+.prow.wait{border-left-color:var(--amber)}.prow.unacc{border-left-color:var(--red)}.prow.safe{border-left-color:var(--safe)}
+.prow.urgent{background:var(--orange-bg);border-left-color:var(--orange)}
+.pr-open{flex:1;min-width:0;display:grid;grid-template-columns:minmax(0,1.1fr) auto minmax(0,1.3fr);gap:10px;align-items:center;padding:8px 4px 8px 13px;border:0;background:none;text-align:left;cursor:pointer;border-radius:6px}
+.pr-open:hover{background:rgba(34,9,1,.03)}
+.pr-who b{display:block;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr-who b.masked{display:flex;align-items:center;gap:5px;color:var(--muted);font-weight:500;font-style:italic}
+.pr-who small,.pr-loc small{display:block;font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr-loc span{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chipbtn{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 6px 0 10px;border-radius:999px;border:1px solid var(--line2);background:var(--sub);font-size:12px;font-weight:600;cursor:pointer}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--brown);color:#fff}
+
+/* Dispatch */
+.dgrid{display:grid;grid-template-columns:300px minmax(0,1fr) 340px;gap:16px;align-items:start}
+.dcol{display:flex;flex-direction:column;gap:16px;min-width:0}
+.tsel{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer;align-items:start}
+.tsel:hover{background:var(--sub)}
+.tsel input{width:17px;height:17px;margin:2px 0 0;accent-color:var(--brown)}
+.tsel b{font-size:13px;font-weight:600;display:block}
+.tsel small{display:block;font-size:11.5px;color:var(--muted)}
+.tsel .note{color:var(--brown);font-weight:600}
+.tsel .chip{margin-top:6px}
+.tsel.ro{cursor:default}
+.tsel-grp{padding:8px 14px 4px;font-size:11.5px;font-weight:700;color:var(--muted);background:var(--sub);border-bottom:1px solid var(--line)}
+.resp{padding:12px 14px;border-bottom:1px solid var(--line)}
+.resp:last-child{border-bottom:0}
+.resp-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.resp-h b{font-size:13px;font-weight:600}
+.resp p{font-size:12.5px;margin-top:6px}
+.resp .meta{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:4px}
+.steps{display:flex;gap:3px;margin-top:8px}
+.steps span{flex:1;height:4px;border-radius:2px;background:var(--neutral-bg)}
+.steps span.on{background:var(--brown)}
+.steps span.done{background:var(--safe)}
+.feed-list{list-style:none;margin:0;padding:0;max-height:380px;overflow:auto}
+.fi{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;padding:10px 16px;border-bottom:1px solid var(--line)}
+.fi-ic{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--neutral-bg);color:var(--brown)}
+.fi.cat-help .fi-ic{background:var(--wait-bg);color:#6B4500}
+.fi.cat-checkin .fi-ic{background:var(--safe-bg);color:var(--safe)}
+.fi.cat-count .fi-ic{background:var(--unacc-bg);color:var(--red)}
+.fi.cat-plan .fi-ic{background:var(--esp);color:#fff}
+.fi.cat-reply .fi-ic{background:var(--brown);color:#fff}
+.fi-h{display:flex;justify-content:space-between;gap:8px}
+.fi-h b{font-size:12.5px;font-weight:600}
+.fi-h time{font-size:11.5px;color:var(--muted);flex:none}
+.fi p{font-size:13px;margin-top:2px;overflow-wrap:anywhere}
+.dl{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--muted);margin-top:3px}
+.composer{border-top:1px solid var(--line);padding:12px 16px;display:flex;flex-direction:column;gap:8px;background:var(--sub);border-radius:0 0 var(--r) var(--r)}
+.composer .row{display:flex;gap:8px;align-items:center}
+.composer select,.field select,.field input,.inp{height:34px;border:1px solid var(--line2);border-radius:8px;padding:0 10px;background:#fff}
+.composer textarea{width:100%;border:1px solid var(--line2);border-radius:8px;padding:8px 10px;resize:vertical;min-height:52px;background:#fff}
+.composer .err{color:var(--red);font-size:12px;font-weight:600}
+.offline{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+
+/* Overlays */
+.ov{position:fixed;inset:0;background:rgba(34,9,1,.42);z-index:60;display:grid;place-items:center;padding:24px;animation:fade .15s ease-out}
+.ov-drawer{place-items:stretch end;padding:0}
+.dialog{background:#fff;border-radius:14px;box-shadow:var(--sh-lg);width:min(560px,100%);max-height:calc(100vh - 48px);overflow:auto;outline:none}
+.dialog.wide{width:min(920px,100%)}
+.drawer{background:#fff;width:min(500px,100vw);height:100vh;overflow:auto;box-shadow:var(--sh-lg);outline:none;animation:slide .2s ease-out}
+.dlg-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:18px 20px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:2}
+.dlg-h h2{font-size:17px;font-weight:700}
+.dlg-b{padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.dlg-f{display:flex;justify-content:flex-end;gap:8px;padding:14px 20px;border-top:1px solid var(--line);position:sticky;bottom:0;background:#fff}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:8px 14px;margin:0;font-size:13px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;font-weight:500}
+.check{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line2);border-radius:8px;cursor:pointer}
+.check input{width:17px;height:17px;margin:1px 0 0;accent-color:var(--brown)}
+.mini-ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.warnbox{display:flex;gap:8px;padding:10px 12px;border-radius:8px;background:var(--unacc-bg);color:var(--red);font-size:12.5px;font-weight:600}
+.infobox{display:flex;gap:8px;padding:10px 12px;border-radius:8px;background:var(--sub);border:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.sec-t{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.checks li{display:flex;gap:8px;align-items:flex-start}
+.checks .ok{color:var(--safe)}.checks .bad{color:var(--red)}
+#toast-root{position:fixed;right:20px;bottom:20px;z-index:80;display:flex;flex-direction:column;gap:8px}
+.toast{display:flex;align-items:center;gap:9px;background:var(--esp);color:#fff;padding:11px 14px;border-radius:10px;box-shadow:var(--sh-lg);font-size:13px;max-width:380px;animation:fade .2s ease-out}
+.toast.out{opacity:0;transition:opacity .3s}
+[data-tip]{position:relative}
+[data-tip]:hover::after,[data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--esp);color:#fff;font-size:11.5px;font-weight:500;padding:5px 8px;border-radius:6px;white-space:nowrap;z-index:30;pointer-events:none}
+@keyframes fade{from{opacity:0}}
+@keyframes slide{from{transform:translateX(24px);opacity:.4}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Login */
+.login{display:grid;grid-template-columns:minmax(420px,44%) 1fr;min-height:100vh}
+.login-brand{background:var(--esp);color:#EBDCD4;padding:48px 56px;display:flex;flex-direction:column;justify-content:space-between}
+.login-brand h1{font-size:34px;line-height:1.15;color:#fff;font-weight:800;letter-spacing:-.02em;margin:28px 0 14px;max-width:440px}
+.login-brand p{max-width:420px;color:#D4C0B6;font-size:15px}
+.lb-list{list-style:none;padding:0;margin:28px 0 0;display:flex;flex-direction:column;gap:12px}
+.lb-list li{display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.lb-list .ic{color:var(--amber);margin-top:2px}
+.login-main{display:grid;place-items:center;padding:40px}
+.login-card{width:min(460px,100%)}
+.login-card h2{font-size:24px;font-weight:800;letter-spacing:-.01em}
+.rolecard{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:14px;border:1px solid var(--line2);border-radius:10px;background:#fff;cursor:pointer;margin-top:10px}
+.rolecard:has(input:checked){border-color:var(--brown);box-shadow:inset 0 0 0 1px var(--brown);background:var(--brown-bg)}
+.rolecard input{accent-color:var(--brown);width:17px;height:17px}
+.rolecard b{display:block;font-size:14px}
+.rolecard small{display:block;color:var(--muted);font-size:12.5px}
+.field{display:flex;flex-direction:column;gap:5px;margin-top:16px}
+.field label,.field .lab{font-size:12.5px;font-weight:600}
+.field input{height:40px}
+
+/* Calm state */
+.calm{display:flex;gap:16px;align-items:flex-start;padding:20px}
+.calm .em-ic{width:44px;height:44px;border-radius:12px;background:var(--safe-bg);color:var(--safe);display:grid;place-items:center;flex:none}
+.calm h2{font-size:18px;margin:6px 0 4px}
+.calm p{color:var(--muted)}
+.demo{padding:20px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;border-style:dashed}
+
+/* Timeline */
+.lgrid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:16px;align-items:start}
+.filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px}
+.filters .field{margin:0}
+.filters select{min-width:160px}
+.inc{display:block;width:100%;text-align:left;padding:12px 14px;border:0;border-bottom:1px solid var(--line);background:none;cursor:pointer}
+.inc:hover{background:var(--sub)}
+.inc[aria-current=true]{background:var(--brown-bg);box-shadow:inset 3px 0 var(--brown)}
+.inc b{display:block;font-size:13.5px}
+.inc small{display:block;color:var(--muted);font-size:12px}
+.inc .row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px}
+.tl{list-style:none;margin:0;padding:6px 0}
+.tl li{display:grid;grid-template-columns:72px 30px minmax(0,1fr);gap:10px;padding:8px 16px;position:relative}
+.tl li::before{content:"";position:absolute;left:calc(16px + 72px + 10px + 14px);top:0;bottom:0;width:2px;background:var(--line)}
+.tl li:first-child::before{top:18px}.tl li:last-child::before{bottom:calc(100% - 18px)}
+.tl time{font-size:12.5px;font-weight:600;color:var(--muted);padding-top:5px}
+.tl .fi-ic{position:relative;z-index:1}
+.tl p{font-size:13px}
+.tl .who{font-weight:600;font-size:12.5px;display:flex;align-items:center;gap:8px}
+
+/* Map */
+.mgrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.plate{width:100%;height:auto;display:block}
+.mk{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;padding:9px 14px;border-bottom:1px solid var(--line)}
+.mk .sw{width:12px;height:12px;border-radius:3px}
+.mk input{width:100%;height:32px;border:1px solid var(--line2);border-radius:7px;padding:0 8px}
+.mk small{display:block;font-size:11.5px;color:var(--muted)}
+.qr{width:150px;height:150px}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+.toolbar .inp{min-width:240px}
+.swatch{display:flex;flex-direction:column;gap:6px;font-size:12px}
+.swatch span{height:56px;border-radius:8px;border:1px solid var(--line)}
+.comp-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+/* Report paper */
+.paper{background:#fff;color:#000;padding:28px 32px;font-size:13px}
+.paper h1{font-size:20px;font-weight:800}
+.paper h3{font-size:14px;margin:18px 0 6px;padding-bottom:4px;border-bottom:2px solid #000}
+.paper table{width:100%;border-collapse:collapse;font-size:12.5px}
+.paper th,.paper td{border:1px solid #9A8D87;padding:6px 8px;text-align:left;vertical-align:top}
+.paper th{background:#F2EEEC}
+.paper ol{margin:6px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:3px}
+.rp-meta{display:flex;gap:18px;flex-wrap:wrap;color:#333;margin-top:6px}
+.rp-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* Responsive */
+@media (max-width:1439px){.dgrid{grid-template-columns:270px minmax(0,1fr) 310px}}
+@media (max-width:1365px){
+  :root{--side:216px}
+  .page{padding:16px 18px 28px}
+  .grid,.dgrid{gap:12px}
+  .hdr{padding:0 18px;gap:10px}.banner{padding:10px 18px}
+  .upd .lbl,.user div{display:none}
+  .stat-n{font-size:34px}
+  .bn-stats{gap:16px}
+}
+@media (max-width:1279px){
+  .c3{grid-column:span 6}.c4,.c5,.c7,.c8{grid-column:span 12}
+  .dgrid{grid-template-columns:260px minmax(0,1fr)}.dgrid>.resp-col{grid-column:1/-1}
+  .lgrid,.mgrid{grid-template-columns:1fr}
+}
+@media (min-width:1800px){body{font-size:15px}.stat-n{font-size:46px}.ppl-body{max-height:560px}.feed-list{max-height:480px}}
+@media (max-height:800px){.banner{padding-top:8px;padding-bottom:8px}.bn-ic{width:36px;height:36px}.bn-type{font-size:17px}}
+@media print{
+  body.print-report #app,body.print-report #toast-root,body.print-report .rp-toolbar,body.print-report .dlg-h{display:none!important}
+  body.print-report .ov{position:static;background:none;padding:0;display:block}
+  body.print-report .dialog{box-shadow:none;max-height:none;overflow:visible;width:auto;border-radius:0}
+  body.print-report .paper{padding:0}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast-root" role="status" aria-live="polite"></div>
+<div id="sr-live" class="sr" aria-live="polite"></div>
+<div id="sr-alert" class="sr" aria-live="assertive"></div>
+<script>
+'use strict';
+
+/* ============ Constants and data ============ */
+const TOWER = 'UOA Corporate Tower', FLOORS = 38, FIRE_FLOOR = 22, TODAY = '15 Nov 2026';
+const TOWERS = ['UOA Corporate Tower', 'Business Suites Tower A', 'Business Suites Tower B', 'Vertical Corporate Tower B'];
+const USERS = {
+  security: { name: 'Hasnah Yusof', role: 'UOA Security', ini: 'HY', email: 'hasnah.yusof@uoa.my', desc: 'Fire command centre. Manages the incident, plan and teams.' },
+  bomba: { name: 'Kamal Ariffin', role: 'Bomba Incident Commander', ini: 'KA', email: 'kamal.ariffin@bomba.gov.my', desc: 'Reviews the plan and decides. Sees names only in Details.' }
+};
+const I = {
+  dash: '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+  radio: '<path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/>',
+  list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  map: '<path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3z"/><path d="M9 3v15M15 6v15"/>',
+  users: '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+  idcard: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17a3.5 3.5 0 0 1 7 0M15 9h3M15 13h3"/>',
+  qr: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+  bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>',
+  flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3.2.3 1.6 1.4 2.7 2.5 2.7z"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  checkc: '<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',
+  alert: '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+  spark: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+  edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  send: '<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
+  down: '<path d="m6 9 6 6 6-6"/>', right: '<path d="m9 6 6 6-6 6"/>', x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  print: '<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+  file: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>',
+  truck: '<path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+  flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
+  layers: '<path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5M2 12l10 5 10-5"/>',
+  usercheck: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/>',
+  dashed: '<circle cx="12" cy="12" r="8" stroke-dasharray="3 3"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+  wifioff: '<path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M2 8.8a15 15 0 0 1 4.2-2.7M10.7 5.1A15 15 0 0 1 22 8.8M5 12.9a10 10 0 0 1 5.2-2.8M16.9 11.5A10 10 0 0 1 19 12.9M12 20h.01"/>',
+  msg: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  building: '<rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M8 6h.01M12 6h.01M16 6h.01M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  refresh: '<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>',
+  eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+};
+const ic = (n, s = 18, c = '') => `<svg class="ic ${c}" width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n] || ''}</svg>`;
+const logo = (s = 32) => `<svg width="${s}" height="${s}" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#BC3908"/><path d="M10.5 23V9h6a4.5 4.5 0 0 1 0 9h-6" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M16.5 18l5 5" stroke="#F6AA1C" stroke-width="2.6" stroke-linecap="round"/></svg>`;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const $ = s => document.querySelector(s);
+const pad = n => String(n).padStart(2, '0');
+
+const OST = {
+  waiting: { label: 'Waiting for help', icon: 'clock', cls: 'wait' },
+  safe: { label: 'Safe', icon: 'checkc', cls: 'safe' },
+  unacc: { label: 'Unaccounted for', icon: 'alert', cls: 'unacc' }
+};
+const TST = {
+  not_sent: { l: 'Not sent', i: 'dashed', c: 'neutral' }, sent: { l: 'Sent', i: 'send', c: 'info' },
+  ack: { l: 'Acknowledged', i: 'check', c: 'info' }, enroute: { l: 'En route', i: 'truck', c: 'brown' },
+  staging: { l: 'At staging', i: 'flag', c: 'brown' }, onfloor: { l: 'On floor', i: 'layers', c: 'brown' },
+  reached: { l: 'Person reached', i: 'usercheck', c: 'brown' }, done: { l: 'Done', i: 'checkc', c: 'safe' }
+};
+const TORDER = ['not_sent', 'sent', 'ack', 'enroute', 'staging', 'onfloor', 'reached', 'done'];
+const CATS = {
+  incident: { l: 'Incident', i: 'flame' }, notify: { l: 'Notifications', i: 'bell' }, help: { l: 'Help requests', i: 'clock' },
+  checkin: { l: 'Check-ins', i: 'checkc' }, count: { l: 'Count changes', i: 'users' }, plan: { l: 'Response plan', i: 'spark' },
+  team: { l: 'Team replies', i: 'radio' }, reply: { l: 'Commander replies', i: 'usercheck' }, message: { l: 'Messages', i: 'msg' },
+  report: { l: 'Bomba report', i: 'file' }
+};
+const NAV = [
+  { id: 'dashboard', label: 'Dashboard', icon: 'dash' },
+  { id: 'dispatch', label: 'Dispatch and communication', icon: 'radio' },
+  { id: 'log', label: 'Incident log', icon: 'list' },
+  { id: 'map', label: 'Building map', icon: 'map' },
+  { id: 'teams', label: 'Team settings', icon: 'users', sec: true },
+  { id: 'people', label: 'People and profiles', icon: 'idcard', sec: true },
+  { id: 'visitors', label: 'Visitors', icon: 'qr', sec: true },
+  { id: 'audit', label: 'Audit log', icon: 'shield', sec: true }
+];
+const TITLES = { dashboard: 'Live command dashboard', dispatch: 'Dispatch and communication', log: 'Incident log', map: 'Building map setup', teams: 'Team settings', people: 'People and profiles', visitors: 'Visitors', audit: 'Audit log', components: 'Component library' };
+
+function seedPeople() {
+  let id = 0;
+  const P = (n, c, status, loc, t, x = {}) => ({ id: 'p' + (++id), n, c, floor: 22, status, loc, t, src: x.src || '', need: x.need || '', noStairs: !!x.noStairs, acked: x.acked !== false, ackBy: x.ackBy || '', profile: x.profile || 'None', signin: x.signin || '08:4' + (id % 10) });
+  const safeT = ['10:43:10', '10:43:24', '10:43:41', '10:44:02', '10:44:19', '10:44:37', '10:44:58', '10:45:16', '10:45:40'];
+  const safeN = [['Daniel Ong', 'Meridian Legal'], ['Farah Aziz', 'Meridian Legal'], ['Kevin Lim', 'Kestrel Analytics'], ['Nurul Huda', 'Meridian Legal'], ['Priya Nair', 'Kestrel Analytics'], ['Jason Tan', 'Meridian Legal'], ['Siti Mariam', 'Kestrel Analytics'], ['Hafiz Ismail', 'Meridian Legal'], ['Grace Wong', 'Kestrel Analytics']];
+  return [
+    P('Aisyah Rahman', 'Meridian Legal', 'waiting', 'Stairwell B waiting point', '10:42:05', { src: 'Help request in Relay app. GPS and barometer: Level 22.', need: 'Cannot use stairs. Leg injury, walking with a crutch.', noStairs: true, ackBy: 'Hasnah Yusof, UOA Security, 10:42:19', profile: 'Cannot use stairs (temporary, leg injury)' }),
+    P('Amirul Hakim', 'Meridian Legal', 'unacc', 'Level 22 pantry (office Wi-Fi)', '10:12', { src: 'Last seen on office Wi-Fi' }),
+    P('Lim Wei Jie', 'Kestrel Analytics', 'unacc', 'Level 22, Kestrel Analytics (app opened)', '09:15', { src: 'Relay app opened' }),
+    P('Sarah Chong', 'Kestrel Analytics', 'unacc', 'Lobby gate sign-in, 08:52', 'None', { src: 'No update since sign-in', signin: '08:52' }),
+    ...safeN.map(([n, c], i) => P(n, c, 'safe', 'Assembly point A', safeT[i], { src: 'Check-in in Relay app, GPS confirmed' }))
+  ];
+}
+function seedTeams() {
+  const T = (id, name, cat, channel, sel, note = '') => ({ id, name, cat, channel, avail: 'Available', sel, note, status: 'not_sent', msg: '', eta: '', sentMs: 0, updated: '', history: [] });
+  return [
+    T('pantai', 'Bomba Pantai', 'Fire station', 'Relay link, SMS fallback', true),
+    T('hangtuah', 'Bomba Hang Tuah', 'Fire station', 'Relay link, SMS fallback', true),
+    T('seputeh', 'Bomba Seputeh', 'Fire station', 'Relay link, SMS fallback', true),
+    T('hrr', 'Bomba High-Rise Rescue', 'Specialist rescue', 'Relay link, SMS fallback', true),
+    T('emrs', 'Bomba EMRS', 'Emergency medical', 'Relay link, SMS fallback', true),
+    T('ert', 'Building ERT', 'Building team', 'Relay link, radio channel 2', true, 'Stays off the fire floor. Hands over plans and lift control.'),
+    T('pdrm', 'PDRM Patrol', 'Police', 'Relay link, SMS fallback', false, 'Not needed for a fire')
+  ];
+}
+const SCRIPT = {
+  ert: [[4, 'ack', 'Received. Taking floor plans and lift control keys to Level 20.'], [18, 'staging', 'At Level 20 staging. Floor plans and fire lift control ready for Bomba.']],
+  pantai: [[6, 'ack', 'Received. Reviewing the plan.'], [11, 'enroute', 'Leaving Pantai now. Expect us in about 7 minutes.', 7], [45, 'staging', 'At Level 20 with Building ERT. Commander at the fire command centre.']],
+  hrr: [[8, 'ack', 'Received.'], [15, 'enroute', 'Rescue team moving. About 11 minutes out.', 11], [70, 'onfloor', 'On Level 22 via Stairwell B.'], [90, 'reached', 'With the person at the Level 22 waiting point.']],
+  hangtuah: [[9, 'ack', 'Received.'], [16, 'enroute', 'On the way. About 9 minutes.', 9]],
+  seputeh: [[12, 'ack', 'Received. Standing by to support Pantai.']],
+  emrs: [[10, 'ack', 'Received.'], [20, 'enroute', 'Heading to Assembly point A. About 8 minutes.', 8]],
+  pdrm: [[7, 'ack', 'Received. Can help with traffic at the main entrance if asked.']]
+};
+function seedVisitors() {
+  return [
+    { n: 'Marcus Teo', host: 'Kestrel Analytics', floor: 22, qr: '09:20', out: '10:20', status: 'Left before incident' },
+    { n: 'Ravi Menon', host: 'Meridian Legal', floor: 22, qr: '08:55', out: '09:40', status: 'Left before incident' },
+    { n: 'Goh Hui Min', host: 'Bayu Capital', floor: 30, qr: '10:05', out: '', status: 'On site, floor on standby' }
+  ];
+}
+const PAST = [
+  { id: 'd0814', type: 'Fire drill', tower: 'UOA Corporate Tower', floor: 15, date: '14 Aug 2026', start: '15:00', status: 'Completed', dur: '22 min', events: [
+    ['15:00:00', 'incident', 'Hasnah Yusof', 'Fire drill started, Level 15'], ['15:00:03', 'notify', 'Relay', 'Drill notification sent to 41 occupants on Level 15'],
+    ['15:01:40', 'help', 'Relay app', 'Help request received from Level 15 waiting point'], ['15:02:10', 'plan', 'Relay AI', 'Response plan generated and verified against live building data'],
+    ['15:03:05', 'plan', 'Hasnah Yusof', 'Edited line 2 before sending'], ['15:03:30', 'plan', 'Hasnah Yusof', 'Plan sent for review to 6 teams'],
+    ['15:03:41', 'team', 'Building ERT', 'Acknowledged'], ['15:04:02', 'team', 'Bomba Pantai', 'Acknowledged. Drill noted.'],
+    ['15:06:12', 'reply', 'Bomba Incident Commander', 'Replied to plan: Followed'], ['15:12:40', 'checkin', 'Relay app', 'Last occupant checked in at Assembly point A'],
+    ['15:22:00', 'incident', 'Hasnah Yusof', 'Drill ended']] },
+  { id: 'a0602', type: 'Fire alarm', tower: 'Business Suites Tower A', floor: 9, date: '02 Jun 2026', start: '11:20', status: 'Closed, false alarm', dur: '11 min', events: [
+    ['11:20:00', 'incident', 'Hasnah Yusof', 'Fire alarm, Level 9'], ['11:20:04', 'notify', 'Relay', 'Notification sent to 28 occupants on Level 9'],
+    ['11:22:30', 'plan', 'Relay AI', 'Response plan generated and verified'], ['11:24:10', 'message', 'Building ERT', 'Smoke detector fault in pantry. No fire.'],
+    ['11:31:00', 'incident', 'Hasnah Yusof', 'Closed as false alarm']] }
+];
+
+/* ============ State ============ */
+const S = {
+  signedIn: false, role: 'security', loginRole: 'security', route: 'dashboard', prevRoute: '',
+  incident: null, people: seedPeople(), teams: seedTeams(), plan: null, events: [], audit: [], seq: 0,
+  unread: 0, notifOpen: false, selFloor: null, safeOpen: false, allFloors: false, linked: false, lastUpdate: null,
+  reportShared: null, liftChoice: null, reply: null, replyOpen: false, replyNote: '',
+  composer: '', composerTo: 'selected', composerErr: '', feedF: 'all', flash: {},
+  logSel: null, lf: { date: 'all', tower: 'all', type: 'all', cat: 'all' },
+  map: { tower: TOWER, floor: '22', names: { stairA: 'Stairwell A', stairB: 'Stairwell B', lift: 'Fire lift lobby', wpA: 'Stairwell A waiting point', wpB: 'Stairwell B waiting point', access: 'Bomba access point, main entrance', fcc: 'Fire command centre', assembly: 'Assembly point A' } },
+  pplQ: '', pplCo: 'all', visitors: seedVisitors(), past: PAST.slice(), archived: 0
+};
+const isSec = () => S.role === 'security';
+const me = () => USERS[S.role];
+let timers = [];
+const later = (fn, ms) => { timers.push(setTimeout(fn, ms)); };
+
+/* ============ Time ============ */
+const BASE = 10 * 3600 + 46 * 60; // demo opens 5 minutes into an incident that started 10:41:00
+const hms = s => `${pad(Math.floor(s / 3600) % 24)}:${pad(Math.floor(s % 3600 / 60))}:${pad(s % 60)}`;
+const realSec = () => { const d = new Date(); return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds(); };
+const nowSec = () => S.incident ? BASE + Math.floor((Date.now() - S.incident.t0) / 1000) : realSec();
+const now = () => hms(nowSec());
+const toSec = t => { if (!t || t === 'None') return -1; const p = t.split(':').map(Number); return p[0] * 3600 + p[1] * 60 + (p[2] || 0); };
+function elapsedLabel() { const X = S.incident; if (!X) return ''; const s = 300 + Math.floor(((X.endMs || Date.now()) - X.t0) / 1000); return `${Math.floor(s / 60)} min ${pad(s % 60)} s`; }
+
+/* ============ Data operations ============ */
+function counts(floor) {
+  const c = { wait: 0, safe: 0, un: 0, total: 0 };
+  for (const p of S.people) {
+    if (floor != null && p.floor !== floor) continue;
+    c.total++;
+    if (p.status === 'waiting') c.wait++; else if (p.status === 'safe') c.safe++; else c.un++;
+  }
+  return c;
+}
+const person = id => S.people.find(p => p.id === id);
+const byName = n => S.people.find(p => p.n.toLowerCase() === String(n || '').toLowerCase());
+const team = id => S.teams.find(t => t.id === id);
+const countText = c => `${c.wait} waiting for help, ${c.safe} safe, ${c.un} unaccounted for`;
+
+function addEvent(cat, sender, text, o = {}) {
+  const e = { id: ++S.seq, t: o.t || now(), cat, sender, text, sb: o.sb || null, tb: o.tb || null, delivery: o.delivery || 'Logged', person: o.person || null, notify: !!o.notify, read: false };
+  S.events.unshift(e);
+  if (e.notify) S.unread++;
+  S.lastUpdate = e.t;
+  return e;
+}
+const evText = e => (!isSec() && e.tb) ? e.tb : e.text;
+const evSender = e => (!isSec() && e.sb) ? e.sb : e.sender;
+function audit(action, who = '') { S.audit.unshift({ t: now(), user: me().name, role: me().role, action, person: who }); }
+function announce(msg, assertive) { const el = $(assertive ? '#sr-alert' : '#sr-live'); if (el) { el.textContent = ''; setTimeout(() => { el.textContent = msg; }, 50); } }
+
+/* Plan: built only from live data, never invents counts */
+function genLines() {
+  const w = S.people.filter(p => p.status === 'waiting' && p.floor === FIRE_FLOOR);
+  const c = counts(FIRE_FLOOR);
+  const l4 = w.length
+    ? `Bomba rescue: Level 22 waiting point${w.length > 1 ? 's' : ''}, ${w.length} ${w.length === 1 ? 'person' : 'people'}, ${w.every(p => p.noStairs) ? 'cannot use stairs' : 'needs help'}. Lift or stairs: commander decides.`
+    : 'Bomba rescue: no one waiting for help on Level 22 right now.';
+  return [
+    'Get in: appliances to the main entrance. Command at the fire command centre.',
+    'Stage on Level 20. ERT hands over floor plans and lift control.',
+    'Crews go up Stairwell B. Occupants come down Stairwell A.',
+    l4,
+    `Bomba search: Level 22 then 23, ${c.un} unaccounted. EMRS: assembly point.`
+  ];
+}
+const HEADCOUNT = /\b(\d+|two|three|four|five|six|seven|eight|nine|ten)\s+(?:[a-z-]+\s+){0,2}?(fire ?fighters?|firemen|rescuers?|crews?|units?|appliances?|engines?|vehicles?|trucks?|responders?|officers?|personnel|men|staff)\b/i;
+function verify(lines) {
+  const c = counts(FIRE_FLOOR), out = [];
+  lines.forEach((t, i) => {
+    if (HEADCOUNT.test(t)) out.push({ i, msg: 'Remove the responder or vehicle number. Relay plans never say how many to send.' });
+    if (/\bERT\b/i.test(t) && /(level\s*22|fire floor|carr(y|ies|ied))/i.test(t)) out.push({ i, msg: 'Building ERT does not enter the fire floor or carry occupants.' });
+    if (/\b(approve|approved|order|orders)\b/i.test(t)) out.push({ i, msg: 'The plan is advice for review. Avoid "approve" and "order".' });
+    if (!t.trim()) out.push({ i, msg: 'This line is empty.' });
+  });
+  const m4 = (lines[3] || '').match(/(\d+)\s+(person|people)/i);
+  if (m4 && +m4[1] !== c.wait) out.push({ i: 3, msg: `Says ${m4[1]} waiting. Live data shows ${c.wait}.` });
+  const m5 = (lines[4] || '').match(/(\d+)\s+unaccounted/i);
+  if (m5 && +m5[1] !== c.un) out.push({ i: 4, msg: `Says ${m5[1]} unaccounted. Live data shows ${c.un}.` });
+  return out;
+}
+function createPlan() {
+  const t = now();
+  S.plan = { lines: genLines().map(x => ({ text: x, auto: x, edited: false, flash: 0 })), createdAt: t, updatedAt: t, verifiedAt: t, editing: false, buf: null, sentAt: null, sentBy: null, sentLines: null, sentFlash: {}, lastSent: null, updates: 0 };
+}
+const planIssues = () => S.plan ? verify(S.plan.lines.map(l => l.text)) : [];
+function pendingChanges() { const P = S.plan; if (!P || !P.sentAt) return []; return P.lines.map((l, i) => l.text !== P.sentLines[i] ? i : -1).filter(i => i >= 0); }
+function refreshPlan() {
+  const P = S.plan; if (!P) return;
+  const g = genLines(), changed = [];
+  g.forEach((t, i) => {
+    const L = P.lines[i]; if (L.auto === t) return;
+    const before = L.text; L.auto = t;
+    if (!L.edited) { if (P.editing && P.buf && P.buf[i] === before) P.buf[i] = t; L.text = t; L.flash = Date.now() + 6000; }
+    changed.push(i);
+  });
+  P.verifiedAt = now();
+  if (changed.length) {
+    P.updatedAt = now();
+    changed.forEach(i => {
+      const L = P.lines[i];
+      addEvent('plan', 'Relay AI', L.edited ? `Live data changed line ${i + 1}. Your edit was kept. Review it.` : `Line ${i + 1} updated from live data: "${L.text}"`, { delivery: P.sentAt ? 'Not yet sent to teams' : 'Draft' });
+    });
+    setTimeout(render, 6100);
+  }
+}
+function countsChanged(before) {
+  const c = counts();
+  ['wait', 'safe', 'un'].forEach(k => { if (c[k] !== before[k]) S.flash[k] = Date.now() + 5000; });
+  if (c.wait !== before.wait || c.safe !== before.safe || c.un !== before.un) {
+    addEvent('count', 'Relay', `Counts changed: ${countText(c)}`, { delivery: 'Live data' });
+    announce(`Counts updated: ${countText(c)}.`);
+    setTimeout(render, 5100);
+  }
+  refreshPlan();
+}
+
+/* ============ Incident lifecycle ============ */
+let bc = null; try { bc = new BroadcastChannel('appname-demo'); } catch (e) { }
+const post = m => { try { bc && bc.postMessage(m); } catch (e) { } };
+
+function startIncident(from) {
+  timers.forEach(clearTimeout); timers = [];
+  S.incident = { kind: 'fire', tower: TOWER, floor: FIRE_FLOOR, t0: Date.now(), endMs: 0, endedAt: '' };
+  S.people = seedPeople(); S.teams = seedTeams(); S.events = []; S.unread = 0; S.flash = {};
+  S.reportShared = null; S.liftChoice = null; S.reply = null; S.replyOpen = false; S.selFloor = null; S.logSel = 'live';
+  const who = from === 'customer' ? 'Relay app (demo link)' : USERS.security.name;
+  const E = (t, cat, s, x, o = {}) => addEvent(cat, s, x, Object.assign({ t }, o));
+  E('10:41:00', 'incident', who, 'Fire incident started. UOA Corporate Tower, Level 22.');
+  E('10:41:02', 'notify', 'Relay', 'Emergency alert sent to 13 occupants on Level 22. Floors 21 and 23 on standby.', { delivery: 'Delivered to 13 phones' });
+  E('10:41:05', 'notify', 'Relay', 'Fire command centre notified. Bomba informed through the fire alarm link.', { delivery: 'Delivered' });
+  E('10:42:05', 'help', 'Aisyah Rahman', 'Help requested at Stairwell B waiting point. Cannot use stairs.', { sb: 'Relay app', tb: 'Help requested at Level 22 Stairwell B waiting point. Cannot use stairs.', delivery: 'Received', person: 'p1' });
+  E('10:42:19', 'help', 'Hasnah Yusof', 'Acknowledged help request from Aisyah Rahman.', { tb: 'Acknowledged a help request on Level 22.', delivery: 'Sent to occupant' });
+  S.people.filter(p => p.status === 'safe').forEach(p => E(p.t, 'checkin', p.n, 'Checked in safe at Assembly point A (GPS confirmed).', { sb: 'Relay app', tb: 'Occupant checked in safe at Assembly point A.', delivery: 'Received', person: p.id }));
+  E('10:45:50', 'count', 'Relay', `Counts: ${countText(counts())}.`, { delivery: 'Live data' });
+  createPlan();
+  S.plan.createdAt = S.plan.updatedAt = S.plan.verifiedAt = '10:45:55';
+  E('10:45:55', 'plan', 'Relay AI', 'Response plan generated from live data. Awaiting human review.', { delivery: 'Draft' });
+  E('10:45:56', 'plan', 'Relay AI', 'Plan verified against live building data: counts, stairwells and staging floor match.', { delivery: 'Draft' });
+  S.lastUpdate = '10:45:56';
+  if (from !== 'customer') post({ type: 'incident.start', incident: { kind: 'fire', tower: TOWER, floor: FIRE_FLOOR, at: '10:41:00' } });
+  audit('Started fire incident, Level 22');
+  later(() => checkin('Amirul Hakim', 'Assembly point A', true), 15000);
+  render();
+}
+function endIncident(from) {
+  const X = S.incident; if (!X || X.endMs) return;
+  X.endMs = Date.now(); X.endedAt = now();
+  timers.forEach(clearTimeout); timers = [];
+  addEvent('incident', from === 'customer' ? 'Relay app (demo link)' : me().name, `Incident ended. Duration ${elapsedLabel()}.`);
+  if (from !== 'customer') post({ type: 'incident.end' });
+  audit('Ended incident');
+  render();
+}
+function resetDemo() {
+  const X = S.incident;
+  if (X) S.past.unshift({ id: 'live' + (++S.archived), type: 'Fire', tower: TOWER, floor: 22, date: TODAY, start: '10:41', status: 'Completed', dur: elapsedLabel(), events: S.events.slice().reverse().map(e => [e.t, e.cat, e.sender, e.text]) });
+  S.incident = null; S.plan = null; S.events = []; S.people = seedPeople(); S.teams = seedTeams(); S.unread = 0; S.logSel = null;
+  render();
+}
+
+/* ============ Occupant updates (from the Relay app or demo script) ============ */
+function findOrAdd(name, floor) {
+  let p = byName(name);
+  if (!p) { p = { id: 'p' + (S.people.length + 1) + 'x', n: name, c: name === 'Visitor' ? 'Visitor' : 'Not on record', floor: floor || FIRE_FLOOR, status: 'unacc', loc: 'Level ' + (floor || FIRE_FLOOR), t: 'None', src: 'Relay app', need: '', noStairs: false, acked: true, ackBy: '', profile: 'None', signin: '' }; S.people.push(p); }
+  return p;
+}
+function checkin(name, place, gps) {
+  if (!S.incident || S.incident.endMs) return;
+  const p = findOrAdd(name), before = counts();
+  const was = p.status;
+  p.status = 'safe'; p.loc = place; p.t = now(); p.src = gps ? 'Check-in in Relay app, GPS confirmed' : 'Check-in in Relay app'; p.acked = true;
+  addEvent('checkin', p.n, `Checked in safe at ${place}${gps ? ' (GPS confirmed)' : ''}.${was === 'unacc' ? ' Was unaccounted for.' : ''}`, { sb: 'Relay app', tb: `Occupant checked in safe at ${place}.`, delivery: 'Received', person: p.id, notify: true });
+  countsChanged(before);
+  render();
+}
+function helpRequest(name, where, floor) {
+  if (!S.incident || S.incident.endMs) return;
+  const p = findOrAdd(name, floor), before = counts();
+  p.status = 'waiting'; p.loc = where || 'Level ' + p.floor; p.t = now(); p.acked = false; p.ackBy = '';
+  p.src = 'Help request in Relay app. GPS and barometer: Level ' + p.floor + '.';
+  if (/aisyah/i.test(p.n)) { p.noStairs = true; p.need = p.need || 'Cannot use stairs.'; }
+  addEvent('help', p.n, `Help requested at ${p.loc}. Not acknowledged yet.`, { sb: 'Relay app', tb: `Help requested on Level ${p.floor}, ${p.loc}.`, delivery: 'Received', person: p.id, notify: true });
+  announce(`New help request on Level ${p.floor}. Not acknowledged.`, true);
+  countsChanged(before); render();
+}
+function helpCancel(name) {
+  const p = byName(name); if (!p || p.status !== 'waiting') return;
+  const before = counts();
+  p.status = 'unacc'; p.loc = 'Cancelled help request, moving to the stairs'; p.t = now(); p.acked = true;
+  addEvent('help', p.n, 'Cancelled help request. Moving to the stairs. Unaccounted for until check-in.', { sb: 'Relay app', tb: 'An occupant cancelled a help request and is moving to the stairs.', delivery: 'Received', person: p.id, notify: true });
+  countsChanged(before); render();
+}
+function ackHelp(id) {
+  const p = person(id); if (!p) return;
+  p.acked = true; p.ackBy = `${me().name}, ${me().role}, ${now()}`;
+  addEvent('help', me().name, `Acknowledged help request from ${p.n}.`, { tb: `Acknowledged a help request on Level ${p.floor}.`, delivery: 'Sent to occupant' });
+  toast('Help request acknowledged. The occupant has been told.'); render();
+}
+
+/* ============ Teams, sending, replies ============ */
+function scheduleTeam(tm) {
+  (SCRIPT[tm.id] || []).forEach(([sec, st, msg, eta]) => {
+    if (st === 'reached' && !S.people.some(p => p.status === 'waiting')) return;
+    later(() => teamUpdate(tm.id, st, msg, eta), sec * 1000);
+  });
+}
+function teamUpdate(id, st, msg, eta) {
+  const tm = team(id); if (!tm || !S.incident || S.incident.endMs) return;
+  if (TORDER.indexOf(st) < TORDER.indexOf(tm.status)) return;
+  tm.status = st; tm.msg = msg; tm.updated = now();
+  if (eta) tm.eta = hms(nowSec() + eta * 60).slice(0, 5);
+  tm.history.push({ t: tm.updated, st, msg });
+  addEvent('team', tm.name, msg, { delivery: 'Received', notify: true });
+  render();
+}
+function doSend(isUpdate) {
+  const P = S.plan, t = now(), changed = pendingChanges();
+  const sel = S.teams.filter(x => x.sel);
+  P.sentLines = P.lines.map(l => l.text);
+  if (!isUpdate) { P.sentAt = t; P.sentBy = USERS.security.name; }
+  else { P.updates++; changed.forEach(i => { P.sentFlash[i] = Date.now() + 8000; }); setTimeout(render, 8100); }
+  P.lastSent = t;
+  sel.forEach(tm => {
+    if (tm.status === 'not_sent') { tm.status = 'sent'; tm.sentMs = Date.now(); tm.msg = 'Plan delivered. Waiting for acknowledgement.'; tm.updated = t; tm.history.push({ t, st: 'sent', msg: 'Plan sent for review' }); scheduleTeam(tm); }
+    else if (isUpdate) tm.history.push({ t, st: tm.status, msg: 'Plan update delivered' });
+  });
+  const names = sel.map(x => x.name).join(', ');
+  const ev = addEvent('plan', `${USERS.security.name}, UOA Security`, isUpdate ? `Plan update sent for review. Changed: line ${changed.map(i => i + 1).join(', ')}.` : `Plan sent for review to ${names}.`, { delivery: 'Sending' });
+  later(() => { ev.delivery = `Delivered to ${sel.length} team${sel.length === 1 ? '' : 's'}`; render(); }, 1500);
+  setTimeout(render, 26000);
+  audit(isUpdate ? 'Sent plan update for review' : 'Sent response plan for review');
+  toast(isUpdate ? 'Update sent to teams for review.' : `Plan sent for review to ${sel.length} teams.`);
+  render();
+}
+function sendReply(kind) {
+  const L = { followed: 'Followed', changed: 'Changed', ignored: 'Ignored' }[kind];
+  const note = S.replyNote.trim();
+  S.reply = { kind, label: L, t: now(), note };
+  S.replyOpen = false;
+  addEvent('reply', `${USERS.bomba.name}, Bomba IC`, `Replied to plan: ${L}.${note ? ' "' + note + '"' : ''}`, { delivery: 'Visible to UOA Security', notify: true });
+  audit('Replied to plan: ' + L);
+  toast(`Reply sent: ${L}. Added to the incident log.`); render();
+}
+
+/* ============ UI pieces ============ */
+const chip = st => { const m = OST[st]; return `<span class="chip ${m.cls}"><span class="ci">${ic(m.icon, 11)}</span>${m.label}</span>`; };
+const overdue = t => t.status === 'sent' && t.sentMs && Date.now() - t.sentMs > 25000;
+const tchip = t => { const m = TST[t.status], o = overdue(t); return `<span class="chip t-${m.c}${o ? ' urgent' : ''}"><span class="ci">${ic(o ? 'alert' : m.i, 11)}</span>${o ? 'No acknowledgement yet' : m.l}</span>`; };
+const cnum = (n, k) => `<span class="cn ${k}${n ? '' : ' zero'}"><span class="d"></span>${n}</span>`;
+const nameOf = p => isSec() ? esc(p.n) : '';
+
+function sidebar() {
+  const pend = S.plan && isSec() ? pendingChanges().length : 0;
+  return `<aside class="side" aria-label="Main navigation">
+  <div class="brand">${logo(32)}<div><div class="bname">Relay</div><div class="bsub">Command</div></div></div>
+  <nav><ul>${NAV.map(n => {
+    const on = S.route === n.id;
+    return `<li><a href="#${n.id}" class="nav ${on ? 'on' : ''}" ${on ? 'aria-current="page"' : ''}>${ic(n.icon, 18)}<span>${n.label}</span>${n.sec && !isSec() ? `<span class="lk" data-tip="UOA Security only">${ic('lock', 14)}</span>` : ''}${n.id === 'dispatch' && pend ? `<span class="nb" aria-label="${pend} unsent changes">${pend}</span>` : ''}</a></li>`;
+  }).join('')}</ul>
+  <div class="nav-sec">Design</div>
+  <ul><li><a href="#components" class="nav ${S.route === 'components' ? 'on' : ''}">${ic('grid', 18)}<span>Component library</span></a></li></ul></nav>
+  <div class="side-ft"><button class="nav sm" data-act="signout">${ic('logout', 16)}<span>Sign out</span></button></div>
+  </aside>`;
+}
+function header() {
+  const X = S.incident, u = me();
+  const pill = !X ? `<span class="pill"><span class="d" style="color:#8C7F79"></span>No incident</span>`
+    : X.endMs ? `<span class="pill">${ic('checkc', 14)}Incident ended ${X.endedAt}</span>`
+      : `<span class="pill live"><span class="d"></span>Fire, Level 22, active</span>`;
+  return `<header class="hdr"><div class="hdr-l"><h1>${TITLES[S.route]}</h1>${pill}</div>
+  <div class="hdr-r">
+    <span class="upd">${ic('refresh', 14)}<span class="lbl">Last updated</span> <b>${S.lastUpdate || 'None'}</b></span>
+    <label class="role-sw"><span>Role</span><select id="role-select" data-in="role" aria-label="Switch role">
+      <option value="security" ${isSec() ? 'selected' : ''}>UOA Security</option>
+      <option value="bomba" ${!isSec() ? 'selected' : ''}>Bomba Incident Commander</option></select></label>
+    <div class="notif"><button id="bell" class="icon-btn" data-act="bell" aria-haspopup="true" aria-expanded="${S.notifOpen}" aria-label="Notifications, ${S.unread} unread">${ic('bell', 18)}${S.unread ? `<span class="dot">${S.unread > 9 ? '9+' : S.unread}</span>` : ''}</button>${S.notifOpen ? notifPanel() : ''}</div>
+    <div class="user"><span class="av ${S.role}" aria-hidden="true">${u.ini}</span><div><b>${u.name}</b><small>${u.role}</small></div></div>
+  </div></header>`;
+}
+function notifPanel() {
+  const list = S.events.filter(e => e.notify).slice(0, 10);
+  return `<div class="npanel" role="region" aria-label="Notifications"><h3>Notifications</h3><ol>${list.length ? list.map(e => `<li><b>${esc(evSender(e))}</b>${esc(evText(e))}<br><time>${e.t}</time></li>`).join('') : '<li>No notifications yet.</li>'}</ol></div>`;
+}
+function banner() {
+  const X = S.incident; if (!X) return '';
+  if (X.endMs) return `<div class="banner ended" role="status"><div class="bn-main"><span class="bn-ic">${ic('checkc', 24)}</span><div><div class="bn-type">Incident ended</div><div class="bn-meta">Fire, UOA Corporate Tower <i></i> Level 22 <i></i> Ended at ${X.endedAt}</div></div></div>
+    <div class="bn-stats"><div><small>Duration</small><b>${elapsedLabel()}</b></div>${isSec() ? '<button class="btn bn-btn" data-act="reset">Clear and reset demo</button>' : ''}</div></div>`;
+  return `<div class="banner" role="status" aria-label="Live incident"><div class="bn-main"><span class="bn-ic">${ic('flame', 24)}</span><div><div class="bn-type">Fire emergency</div><div class="bn-meta">UOA Corporate Tower <i></i> Level 22 <i></i> Started at 10:41 AM</div></div></div>
+  <div class="bn-stats"><div><small>Elapsed</small><b data-tick="elapsed">${elapsedLabel()}</b></div><div><small>Status</small><b><span class="live-dot"></span>Active</b></div><div><small>Your role</small><b>${me().role}</b></div>${isSec() ? '<button class="btn bn-btn sm" data-act="end">End incident</button>' : ''}</div></div>`;
+}
+function login() {
+  const r = S.loginRole, u = USERS[r];
+  const card = k => `<label class="rolecard"><input type="radio" name="lr" value="${k}" data-in="loginrole" ${r === k ? 'checked' : ''}><div><b>${USERS[k].role}</b><small>${USERS[k].name}. ${USERS[k].desc}</small></div><span class="av ${k}" aria-hidden="true">${USERS[k].ini}</span></label>`;
+  return `<div class="login"><section class="login-brand"><div style="display:flex;align-items:center;gap:12px">${logo(40)}<div><div class="bname" style="font-size:20px">Relay</div><div class="bsub">Command</div></div></div>
+    <div><h1>One command view. One live picture.</h1><p>A clearer response when every second matters. Used by UOA Security and the Bomba Incident Commander in the fire command centre.</p>
+    <ul class="lb-list"><li>${ic('users', 18)}Live occupant counts by floor, from Relay check-ins</li><li>${ic('spark', 18)}A five-line AI response plan, checked against live data, for human review</li><li>${ic('radio', 18)}One plan sent to every response team, with replies tracked</li></ul></div>
+    <small style="color:#A88E82">UOA Corporate Tower, fire command centre</small></section>
+  <main class="login-main"><form class="login-card" data-submit="signin"><h2>Sign in to Relay Command</h2><p class="sub" style="font-size:14px;margin-top:6px">Choose your role. Both roles see the same live incident.</p>
+    <fieldset style="border:0;padding:0;margin:14px 0 0"><legend class="sr">Role</legend>${card('security')}${card('bomba')}</fieldset>
+    <div class="field"><label for="em">Work email</label><input id="em" class="inp" value="${u.email}" readonly></div>
+    <button class="btn primary lg block" style="margin-top:20px" type="submit" id="signin-btn">Sign in as ${u.role}</button>
+    <p class="fine" style="margin-top:12px">Demo accounts. No password needed. The Relay customer app on mobile is separate and unchanged.</p></form></main></div>`;
+}
+const locked = () => `<div class="page"><div class="card empty"><span class="em-ic">${ic('lock', 24)}</span><h2>UOA Security only</h2><p>This page holds personal details or building settings. Switch the role to UOA Security to open it.</p></div></div>`;
+
+/* ============ Dashboard ============ */
+function noIncident() {
+  const recent = S.past.slice(0, 3);
+  return `<div class="page"><div class="grid">
+  <section class="card calm c8"><span class="em-ic">${ic('checkc', 24)}</span><div><span class="chip plain">No incident</span><h2>All towers normal</h2><p>Relay is monitoring UOA Corporate Tower. 13 occupants are registered on Level 22 for this demo. Counts appear here as soon as an incident starts.</p></div></section>
+  ${isSec() ? `<section class="card demo c4"><span class="tag amber">Demo control, UOA Security only</span><h3 style="font-size:15px">Trigger a fire on Level 22</h3><p class="fine">Starts the demo 5 minutes into the incident, with check-ins already received. Also starts the Relay customer app if it is open in this browser.</p><button class="btn urgent" data-act="trigger" id="trigger-btn">${ic('flame', 16)}Trigger fire on Level 22</button></section>`
+    : `<section class="card demo c4"><h3 style="font-size:15px">Waiting for UOA Security</h3><p class="fine">When security starts an incident, the live picture and any plan sent for your review appear here.</p></section>`}
+  <section class="card c12"><div class="card-h"><h2>Recent incidents</h2><a class="lnk" href="#log">Incident log ${ic('right', 14)}</a></div>
+  <table class="tbl"><thead><tr><th>Type</th><th>Tower</th><th>Floor</th><th>Date</th><th>Status</th><th class="r">Duration</th></tr></thead><tbody>${recent.map(x => `<tr><td>${x.type}</td><td>${x.tower}</td><td>L${x.floor}</td><td>${x.date}, ${x.start}</td><td>${x.status}</td><td class="r">${x.dur}</td></tr>`).join('')}</tbody></table></section>
+  </div></div>`;
+}
+function statCard(kind, n, desc) {
+  const m = { wait: OST.waiting, safe: OST.safe, un: OST.unacc }[kind];
+  const f = S.flash[kind] > Date.now();
+  return `<section class="card stat c3 ${m.cls} ${f ? 'bump' : ''}" aria-label="${m.label}: ${n}">${f ? '<span class="tag amber chg">Just changed</span>' : ''}
+  <div class="stat-top"><span class="stat-ic">${ic(m.icon, 18)}</span><span class="stat-l">${m.label}</span></div>
+  <div class="stat-n">${n}</div><p class="stat-d">${desc}</p></section>`;
+}
+function buildingCard(c) {
+  const pct = v => c.total ? (v / c.total * 100).toFixed(1) : 0;
+  return `<section class="card bsum c3"><div class="bs-h">${ic('building', 16)}UOA Corporate Tower</div>
+  <div class="bar" role="img" aria-label="${countText(c)}"><span class="w" style="width:${pct(c.wait)}%"></span><span class="s" style="width:${pct(c.safe)}%"></span><span class="u" style="width:${pct(c.un)}%"></span></div>
+  <dl class="bs-dl"><div><dt>Tracked occupants</dt><dd>${c.total}</dd></div><div><dt>Alert area</dt><dd>Level 22</dd></div><div><dt>Floors on standby</dt><dd>${FLOORS - 1}</dd></div><div><dt>Updated</dt><dd>${S.lastUpdate || 'None'}</dd></div></dl>
+  <span class="src ${S.linked ? 'on' : ''}"><span class="d"></span>${S.linked ? 'Live link: Relay app connected' : 'Demo data. Relay app not connected.'}</span></section>`;
+}
+function dashboard() {
+  if (!S.incident) return noIncident();
+  const c = counts(), w = S.people.filter(p => p.status === 'waiting');
+  const un = w.filter(p => !p.acked).length;
+  const wd = !w.length ? 'No one waiting right now.' : un ? `<b style="color:var(--red)">${un} not acknowledged.</b> Act now.`
+    : isSec() ? w.map(p => `${esc(p.n)}, ${esc(p.loc)}`).join('; ') + '.' : `Level 22 waiting point. Names in Details.`;
+  return `<div class="page"><div class="grid">
+  ${statCard('wait', c.wait, wd)}${statCard('safe', c.safe, 'Checked in at Assembly point A.')}${statCard('un', c.un, 'No check-in since the alert. Not confirmed inside.')}${buildingCard(c)}
+  <div class="c8 stretch">${planCard('dash')}</div><div class="c4 stretch">${teamsOverview()}</div>
+  <div class="c7">${floorsCard()}</div><div class="c5">${peopleCard()}</div>
+  </div></div>`;
+}
+
+/* Plan card: security draft and send, or commander review */
+function planCard(variant) {
+  const P = S.plan;
+  if (!P) return `<section class="card plan"><div class="empty"><span class="em-ic">${ic('spark', 22)}</span><h3>No plan yet</h3><p>Relay drafts a plan when an incident starts.</p></div></section>`;
+  return isSec() ? planSecurity(P, variant) : planCommander(P, variant);
+}
+const disclaimer = () => `<div class="disc">${ic('info', 16)}<span><b>AI-generated suggestion.</b> Verified against live building data. Requires human review.</span></div>`;
+function planSecurity(P, variant) {
+  const issues = planIssues(), pend = pendingChanges(), ended = !!S.incident.endMs;
+  const selN = S.teams.filter(t => t.sel).length;
+  const ver = issues.length ? `<span class="chip unacc"><span class="ci">${ic('alert', 11)}</span>${issues.length} check${issues.length > 1 ? 's' : ''} failed</span>`
+    : `<span class="chip safe" data-tip="Checked at ${P.verifiedAt}"><span class="ci">${ic('check', 11)}</span>Verified against live data</span>`;
+  const rev = !P.sentAt ? `<span class="chip wait"><span class="ci">${ic('clock', 11)}</span>Awaiting human review</span>`
+    : pend.length ? `<span class="chip urgent"><span class="ci">${ic('alert', 11)}</span>${pend.length} change${pend.length > 1 ? 's' : ''} not sent</span>`
+      : `<span class="chip t-brown"><span class="ci">${ic('send', 11)}</span>Sent for review ${P.lastSent}</span>`;
+  const lines = P.lines.map((L, i) => {
+    const iss = issues.filter(x => x.i === i);
+    if (P.editing) return `<li class="pl"><span class="n">${i + 1}</span><div><label class="sr" for="pl-${i}">Line ${i + 1}</label><textarea id="pl-${i}" data-in="planbuf" data-i="${i}" rows="2" maxlength="220">${esc(P.buf[i])}</textarea>
+      <div class="edrow"><span class="fine">${P.buf[i] === L.auto ? 'AI text' : 'Edited'}</span>${P.buf[i] !== L.auto ? `<button class="lnk" data-act="resetline" data-i="${i}">Reset to AI text</button>` : ''}</div></div></li>`;
+    const fl = L.flash > Date.now();
+    return `<li class="pl ${fl ? 'flash' : ''} ${iss.length ? 'issue' : ''}"><span class="n">${i + 1}</span><div class="tx">${esc(L.text)}<span class="tags">${fl ? '<span class="tag amber">Updated from live data</span>' : ''}${L.edited ? '<span class="tag brown">Edited by Hasnah</span>' : ''}${pend.includes(i) ? '<span class="tag orange">Not sent</span>' : ''}</span>
+      ${iss.map(x => `<div class="iss">${ic('alert', 14)}${esc(x.msg)}</div>`).join('')}</div></li>`;
+  }).join('');
+  const sendBtn = ended ? `<span class="why">Incident ended.</span>`
+    : P.editing ? `<button class="btn ghost" data-act="canceledit">Cancel</button><button class="btn primary" data-act="saveedit" id="save-edit">Save lines</button>`
+      : !P.sentAt ? `<button class="btn" data-act="edit" id="edit-plan">${ic('edit', 15)}Edit</button><button class="btn primary" data-act="sendreview" id="send-review" ${selN ? '' : 'disabled aria-describedby="why-send"'}>${ic('send', 15)}Send for review</button>${selN ? '' : '<span class="why" id="why-send">Select at least one team on Dispatch.</span>'}`
+        : `<button class="btn" data-act="edit" id="edit-plan">${ic('edit', 15)}Edit</button>${pend.length ? `<button class="btn urgent" data-act="sendupdate" id="send-update">${ic('send', 15)}Send update</button>` : `<button class="btn" disabled aria-describedby="why-upd">Send update</button><span class="why" id="why-upd">No changes since ${P.lastSent}.</span>`}`;
+  const r = S.reply;
+  return `<section class="card plan" aria-label="AI response plan">
+  <div class="plan-hd"><div class="plan-ttl"><h2>${ic('spark', 18)}AI response plan</h2><span class="tag ai">AI-generated</span>${ver}${rev}</div><div class="plan-meta">Updated <b>${P.updatedAt}</b></div></div>
+  <div class="plan-sub">Fire, Level 22, UOA Corporate Tower${variant === 'dispatch' ? '<span class="tag brown">For review only</span>' : ''}</div>
+  <ol class="plan-lines">${lines}</ol>${disclaimer()}
+  ${r ? `<div class="reply-box">${ic('usercheck', 16)}<span><b>Commander reply: ${r.label}</b>, ${r.t}.${r.note ? ' "' + esc(r.note) + '"' : ''}${S.liftChoice ? ` Line 4 decision: ${S.liftChoice}.` : ''}</span></div>` : P.sentAt ? `<div class="reply-box" style="background:var(--sub)">${ic('clock', 16)}<span>No reply from the commander yet. Replies are optional.</span></div>` : ''}
+  <div class="plan-ft"><button class="lnk" data-act="plandetails">${ic('eye', 14)}Details: sources and checks</button><div class="acts">${sendBtn}</div></div></section>`;
+}
+function planCommander(P, variant) {
+  if (!P.sentAt) return `<section class="card plan"><div class="plan-hd"><div class="plan-ttl"><h2>${ic('spark', 18)}Plan received for review</h2></div></div><div class="empty"><span class="em-ic">${ic('clock', 22)}</span><h3>No plan received yet</h3><p>UOA Security is reviewing the AI draft. It appears here when they send it.</p></div></section>`;
+  const waiting = S.people.some(p => p.status === 'waiting');
+  const lines = P.sentLines.map((t, i) => {
+    const fl = (P.sentFlash[i] || 0) > Date.now();
+    const dec = i === 3 && waiting && /lift or stairs/i.test(t) ? `<fieldset class="decide"><legend>Line 4: lift or stairs</legend><div class="opts">
+      <label class="opt"><input type="radio" name="lift" value="Fire lift from Level 20" data-in="lift" ${S.liftChoice === 'Fire lift from Level 20' ? 'checked' : ''}>Fire lift from Level 20</label>
+      <label class="opt"><input type="radio" name="lift" value="Stairs" data-in="lift" ${S.liftChoice === 'Stairs' ? 'checked' : ''}>Stairs</label></div>
+      <span class="why">Your decision. Relay does not choose.</span></fieldset>` : '';
+    return `<li class="pl ${fl ? 'flash' : ''}"><span class="n">${i + 1}</span><div class="tx">${esc(t)}${fl ? '<span class="tags"><span class="tag amber">Updated</span></span>' : ''}${dec}</div></li>`;
+  }).join('');
+  const r = S.reply, ended = !!S.incident.endMs;
+  const rb = k => `<button class="btn" data-act="reply" data-k="${k}" aria-pressed="${r && r.kind === k}">${{ followed: 'Followed', changed: 'Changed', ignored: 'Ignored' }[k]}</button>`;
+  return `<section class="card plan" aria-label="Plan received for review">
+  <div class="plan-hd"><div class="plan-ttl"><h2>${ic('spark', 18)}Plan received for review</h2><span class="tag ai">AI-generated</span><span class="chip safe"><span class="ci">${ic('check', 11)}</span>Verified against live data</span>${P.updates ? `<span class="chip t-brown"><span class="ci">${ic('refresh', 11)}</span>Updated ${P.lastSent}</span>` : ''}</div>
+  <div class="plan-meta">From <b>${P.sentBy}, UOA Security</b><br>Sent at <b>${P.sentAt}</b></div></div>
+  <div class="plan-sub">Fire, Level 22, UOA Corporate Tower <span class="tag brown">For review only</span></div>
+  <ol class="plan-lines">${lines}</ol>${disclaimer()}
+  ${S.replyOpen ? `<div style="margin:10px 18px 0"><label class="lab fine" for="reply-note"><b>What did you change?</b> Optional.</label><textarea id="reply-note" class="note-in" data-in="replynote" placeholder="For example: crews also using Stairwell A from Level 21.">${esc(S.replyNote)}</textarea></div>` : ''}
+  <div class="plan-ft"><div><button class="lnk" data-act="plandetails">${ic('eye', 14)}Details, including names</button>${r ? `<div class="fine" style="margin-top:4px">You replied <b>${r.label}</b> at ${r.t}. Visible to UOA Security.</div>` : '<div class="fine" style="margin-top:4px">Your reply is optional.</div>'}</div>
+  <div class="acts">${ended ? '<span class="why">Incident ended.</span>' : S.replyOpen ? `<button class="btn ghost" data-act="replycancel">Cancel</button><button class="btn primary" data-act="replychanged" id="reply-send">Send reply: Changed</button>` : `<div class="reply-btns" role="group" aria-label="Reply to plan">${rb('followed')}${rb('changed')}${rb('ignored')}</div>`}</div></div></section>`;
+}
+
+function teamsOverview() {
+  return `<section class="card" style="height:100%;display:flex;flex-direction:column"><div class="card-h"><div><h2>Response teams</h2><p class="sub">Status reported by each team</p></div><a href="#dispatch" class="lnk">Dispatch ${ic('right', 14)}</a></div>
+  <ul class="tlist" style="flex:1">${S.teams.map(t => `<li class="trow"><div class="tr-main"><b>${t.name}</b><span class="tr-msg" title="${esc(t.msg)}">${esc(t.msg || (t.note || (t.sel ? 'Selected. Plan not sent yet.' : 'Not selected.')))}</span></div>
+  <div class="tr-side">${tchip(t)}${t.eta ? `<small>ETA ${t.eta}</small>` : t.updated ? `<small>${t.updated}</small>` : ''}</div></li>`).join('')}</ul>
+  <div class="card-f"><span class="fine">Teams report their own deployment. Relay never shows or suggests headcounts.</span></div></section>`;
+}
+const FTAG = { 22: '<span class="tag fire">Fire floor</span>', 23: '<span class="tag">Search next</span>', 21: '<span class="tag">Below fire floor</span>', 20: '<span class="tag brown">Staging</span>' };
+function floorsCard() {
+  const pri = [22, 23, 21, 20];
+  const rest = []; for (let f = FLOORS; f >= 1; f--) if (!pri.includes(f)) rest.push(f);
+  const row = f => {
+    const c = counts(f), ps = S.people.filter(p => p.floor === f && p.t !== 'None');
+    const last = ps.length ? ps.map(p => p.t).sort((a, b) => toSec(b) - toSec(a))[0] : 'None';
+    const sel = S.selFloor === f;
+    return `<tr class="click ${sel ? 'sel' : ''}" data-act="floor" data-f="${f}" tabindex="0" aria-label="Level ${f}: ${countText(c)}"><td><span class="fl">L${f}</span> ${FTAG[f] || ''}</td>
+    <td class="r">${cnum(c.wait, 'wait')}</td><td class="r">${cnum(c.safe, 'safe')}</td><td class="r">${cnum(c.un, 'unacc')}</td><td>${last}</td>
+    <td class="r"><button class="btn xs ${sel ? 'primary' : ''}" data-act="floor" data-f="${f}" aria-pressed="${sel}">${sel ? 'Showing' : 'View people'}</button></td></tr>`;
+  };
+  return `<section class="card"><div class="card-h"><div><h2>Floor monitoring</h2><p class="sub">Alert sent to Level 22. Other floors on standby.</p></div><button class="btn sm" data-act="allfloors" aria-expanded="${S.allFloors}">${S.allFloors ? 'Show priority floors' : `Show all ${FLOORS} floors`}</button></div>
+  <div class="tbl-wrap" data-scroll="floors" style="max-height:${S.allFloors ? 420 : 9999}px"><table class="tbl"><thead><tr><th>Floor</th><th class="r">Waiting for help</th><th class="r">Safe</th><th class="r">Unaccounted for</th><th>Last updated</th><th class="r"><span class="sr">Actions</span></th></tr></thead>
+  <tbody>${pri.map(row).join('')}${S.allFloors ? `<tr class="tbl-sec"><td colspan="6">Standby floors</td></tr>` + rest.map(row).join('') : ''}</tbody></table></div></section>`;
+}
+function prow(p) {
+  const urgent = p.status === 'waiting' && !p.acked;
+  return `<div class="prow ${OST[p.status].cls} ${urgent ? 'urgent' : ''}"><button class="pr-open" data-act="person" data-id="${p.id}" aria-label="Open details${isSec() ? ' for ' + esc(p.n) : ''}, ${OST[p.status].label}, Level ${p.floor}">
+  <span class="pr-who">${isSec() ? `<b>${esc(p.n)}</b>` : `<b class="masked">${ic('lock', 12)}Name in Details</b>`}<small>${esc(p.c)}</small></span>
+  <span>${urgent ? `<span class="chip urgent"><span class="ci">${ic('alert', 11)}</span>Not acknowledged</span>` : chip(p.status)}</span>
+  <span class="pr-loc"><span>L${p.floor}, ${esc(p.loc)}</span><small>${p.t === 'None' ? 'No update since sign-in' : (p.status === 'unacc' ? 'Last seen ' : 'Updated ') + p.t}</small></span></button>
+  ${urgent && isSec() ? `<button class="btn xs urgent" data-act="ack" data-id="${p.id}">Acknowledge</button>` : ''}</div>`;
+}
+function peopleCard() {
+  const inF = p => S.selFloor == null || p.floor === S.selFloor;
+  const w = S.people.filter(p => p.status === 'waiting' && inF(p)).sort((a, b) => (a.acked - b.acked) || toSec(b.t) - toSec(a.t));
+  const u = S.people.filter(p => p.status === 'unacc' && inF(p)).sort((a, b) => toSec(b.t) - toSec(a.t));
+  const s = S.people.filter(p => p.status === 'safe' && inF(p)).sort((a, b) => toSec(b.t) - toSec(a.t));
+  const none = t => `<p class="fine" style="padding:4px 16px 10px">${t}</p>`;
+  return `<section class="card ppl"><div class="card-h"><div><h2>Where people are</h2><p class="sub">${S.selFloor ? 'Level ' + S.selFloor : 'All floors'}${isSec() ? '' : '. Names appear only in Details.'}</p></div>
+  ${S.selFloor ? `<button class="chipbtn" data-act="floor" data-f="">Level ${S.selFloor}${ic('x', 14)}<span class="sr">Clear floor filter</span></button>` : ''}</div>
+  <div class="ppl-body" data-scroll="ppl">
+  <div class="grp-h"><span>Waiting for help (${w.length})</span></div>${w.length ? w.map(prow).join('') : none('No one waiting for help.')}
+  <div class="grp-h"><span>Unaccounted for (${u.length}), most recent first</span></div>${u.length ? u.map(prow).join('') : none('Everyone is accounted for.')}
+  <button class="grp-toggle" data-act="safeopen" aria-expanded="${S.safeOpen}"><span>Safe (${s.length})</span>${ic('down', 16)}</button>${S.safeOpen ? s.map(prow).join('') : ''}
+  </div><div class="card-f"><span class="fine">Opening details is recorded in the audit log.</span><button class="lnk" data-act="report">${ic('file', 14)}Share report with Bomba</button></div></section>`;
+}
+
+/* ============ Dispatch and communication ============ */
+function dispatch() {
+  if (!S.incident) return `<div class="page"><div class="card empty"><span class="em-ic">${ic('radio', 24)}</span><h2>No incident</h2><p>Dispatch and communication opens when an incident is live. Teams are set up in Team settings.</p></div></div>`;
+  const sec = isSec(), sel = S.teams.filter(t => t.sel);
+  const tsel = t => `<label class="tsel ${sec ? '' : 'ro'}"><input type="checkbox" data-in="teamsel" data-id="${t.id}" ${t.sel ? 'checked' : ''} ${sec ? '' : 'disabled'} aria-describedby="tn-${t.id}">
+    <div><b>${t.name}</b><small>${t.cat}. ${t.avail}.</small>${t.note ? `<small class="note" id="tn-${t.id}">${t.note}</small>` : `<span id="tn-${t.id}"></span>`}${tchip(t)}</div></label>`;
+  const grp = (title, f) => `<div class="tsel-grp">${title}</div>${S.teams.filter(f).map(tsel).join('')}`;
+  return `<div class="page"><div class="page-h"><div><h2>Send one plan to every team</h2><p class="sub">Select teams, review the five lines, then send for review. Each team replies in its own words.</p></div>
+  <div class="ph-act"><span class="offline">${ic('wifioff', 15)}If data drops, teams get a text summary every 60 seconds.</span><button class="btn" data-act="report" id="report-btn">${ic('file', 15)}Share report with Bomba</button></div></div>
+  <div class="dgrid">
+   <section class="card"><div class="card-h"><div><h2>Response teams</h2><p class="sub">${sec ? `${sel.length} selected` : 'Read only. UOA Security selects teams.'}</p></div></div>
+   ${grp('Bomba', t => t.id !== 'ert' && t.id !== 'pdrm')}${grp('Building', t => t.id === 'ert')}${grp('Police', t => t.id === 'pdrm')}
+   ${sec ? `<div class="card-f"><button class="lnk" data-act="seldefault">Reset to default</button><span class="fine">Default: all Bomba and Building ERT</span></div>` : ''}</section>
+   <div class="dcol">${planCard('dispatch')}${feedCard()}</div>
+   <section class="card resp-col"><div class="card-h"><div><h2>Team responses</h2><p class="sub">Live acknowledgements and replies</p></div></div>${S.teams.map(respItem).join('')}</section>
+  </div></div>`;
+}
+function respItem(t) {
+  const idx = TORDER.indexOf(t.status);
+  const last = t.history.slice(-2).reverse();
+  return `<div class="resp"><div class="resp-h"><b>${t.name}</b>${tchip(t)}</div>
+  <div class="steps" role="img" aria-label="${TST[t.status].l}, step ${idx + 1} of ${TORDER.length}">${TORDER.map((s, i) => `<span class="${i && i <= idx ? (t.status === 'done' ? 'done' : 'on') : ''}"></span>`).join('')}</div>
+  ${t.msg ? `<p>"${esc(t.msg)}"</p>` : `<p class="fine">${t.note || (t.sel ? 'Selected. Plan not sent yet.' : 'Not selected.')}</p>`}
+  <div class="meta"><span>${t.eta ? 'Reported arrival ' + t.eta : t.status === 'not_sent' ? '' : 'No arrival time reported'}</span><span>${t.updated || ''}</span></div>
+  ${last.length > 1 ? `<div class="meta"><span>Before: ${esc(last[1].msg)}</span><span>${last[1].t}</span></div>` : ''}</div>`;
+}
+const FEEDF = { all: () => true, teams: e => ['team', 'message', 'reply'].includes(e.cat), occupants: e => ['help', 'checkin', 'count'].includes(e.cat), plan: e => ['plan', 'report', 'incident', 'notify'].includes(e.cat) };
+function feedItem(e) {
+  return `<li class="fi cat-${e.cat}"><span class="fi-ic">${ic(CATS[e.cat].i, 15)}</span><div><div class="fi-h"><b>${esc(evSender(e))}</b><time>${e.t}</time></div><p>${esc(evText(e))}</p><span class="dl">${ic('check', 12)}${esc(e.delivery)}</span></div></li>`;
+}
+function feedCard() {
+  const list = S.events.filter(FEEDF[S.feedF]);
+  const pend = isSec() ? pendingChanges().length : 0, ended = S.incident.endMs;
+  const sb = k => `<button data-act="feedf" data-k="${k}" aria-pressed="${S.feedF === k}">${{ all: 'All', teams: 'Teams', occupants: 'Occupants', plan: 'Plan and incident' }[k]}</button>`;
+  return `<section class="card"><div class="card-h"><div><h2>Communication feed</h2><p class="sub">Team messages, check-ins, count changes and plan updates</p></div><div class="seg" role="group" aria-label="Filter feed">${sb('all')}${sb('teams')}${sb('occupants')}${sb('plan')}</div></div>
+  <ol class="feed-list" data-scroll="feed" aria-live="off">${list.length ? list.map(feedItem).join('') : '<li class="fi"><span></span><p class="fine">Nothing here yet.</p></li>'}</ol>
+  ${ended ? '' : `<form class="composer" data-submit="sendmsg"><div class="row"><label class="sr" for="composer-to">Send to</label><select id="composer-to" data-in="composerTo"><option value="selected" ${S.composerTo === 'selected' ? 'selected' : ''}>All selected teams</option>${S.teams.map(t => `<option value="${t.id}" ${S.composerTo === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}</select>
+  <span class="fine" style="margin-left:auto">From ${me().name}, ${me().role}</span></div>
+  <label class="sr" for="composer">Message</label><textarea id="composer" data-in="composer" placeholder="Write a message to teams" rows="2">${esc(S.composer)}</textarea>
+  ${S.composerErr ? `<span class="err" role="alert">${esc(S.composerErr)}</span>` : ''}
+  <div class="row"><span class="fine">Messages are logged with time and delivery status.</span><span style="margin-left:auto;display:flex;gap:8px">${pend ? `<button type="button" class="btn urgent" data-act="sendupdate">${ic('send', 15)}Send update (${pend})</button>` : ''}<button type="submit" class="btn primary" id="send-msg">${ic('msg', 15)}Send message</button></span></div></form>`}</section>`;
+}
+
+/* ============ Incident log ============ */
+function incidents() {
+  const list = [];
+  if (S.incident) list.push({ id: 'live', type: 'Fire', tower: TOWER, floor: 22, date: TODAY, start: '10:41', status: S.incident.endMs ? 'Ended' : 'Active', dur: elapsedLabel(), live: true, events: S.events.slice().reverse().map(e => [e.t, e.cat, evSender(e), evText(e)]) });
+  return list.concat(S.past);
+}
+function logPage() {
+  const all = incidents(), F = S.lf;
+  const shown = all.filter(x => (F.date === 'all' || x.date === F.date) && (F.tower === 'all' || x.tower === F.tower) && (F.type === 'all' || x.type === F.type));
+  const sel = shown.find(x => x.id === S.logSel) || shown[0];
+  const opts = (k, vals, label) => `<div class="field"><label class="lab" for="lf-${k}">${label}</label><select id="lf-${k}" class="inp" data-in="lf" data-k="${k}"><option value="all">All</option>${vals.map(v => `<option ${F[k] === v ? 'selected' : ''}>${v}</option>`).join('')}</select></div>`;
+  const uniq = a => [...new Set(a)];
+  const evs = sel ? sel.events.filter(e => F.cat === 'all' || e[1] === F.cat) : [];
+  return `<div class="page"><div class="filters">${opts('date', uniq(all.map(x => x.date)), 'Date')}${opts('tower', TOWERS, 'Tower')}${opts('type', uniq(all.map(x => x.type)), 'Incident type')}
+  <div class="field"><label class="lab" for="lf-cat">Event category</label><select id="lf-cat" class="inp" data-in="lf" data-k="cat"><option value="all">All</option>${Object.entries(CATS).map(([k, v]) => `<option value="${k}" ${F.cat === k ? 'selected' : ''}>${v.l}</option>`).join('')}</select></div></div>
+  <div class="lgrid"><section class="card"><div class="card-h"><h2>Incidents</h2><span class="fine">${shown.length} shown</span></div>
+  ${shown.length ? shown.map(x => `<button class="inc" data-act="logsel" data-id="${x.id}" aria-current="${sel && sel.id === x.id}"><b>${x.type}, Level ${x.floor}</b><small>${x.tower}</small>
+    <div class="row"><small>${x.date}, ${x.start}. ${x.dur}</small>${x.status === 'Active' ? '<span class="chip urgent plain">Active</span>' : `<span class="chip plain">${x.status}</span>`}</div></button>`).join('') : '<div class="empty"><p>No incidents match these filters.</p></div>'}</section>
+  <section class="card">${sel ? `<div class="card-h"><div><h2>${sel.type}, ${sel.tower}, Level ${sel.floor}</h2><p class="sub">${sel.date}, started ${sel.start}. ${sel.status}. Duration ${sel.dur}.</p></div>${sel.live ? '<span class="tag orange">Live</span>' : ''}</div>
+  <ol class="tl">${evs.length ? evs.map(e => `<li><time>${e[0]}</time><span class="fi-ic">${ic(CATS[e[1]].i, 15)}</span><div><div class="who">${esc(e[2])}<span class="tag">${CATS[e[1]].l}</span></div><p>${esc(e[3])}</p></div></li>`).join('') : '<li><span></span><span></span><p class="fine">No events in this category.</p></li>'}</ol>` : '<div class="empty"><p>Select an incident.</p></div>'}</section></div></div>`;
+}
+
+/* ============ Building map setup ============ */
+function mapPage() {
+  const N = S.map.names, sec = isSec(), f = S.map.floor, g = f === 'G';
+  const L = (x, y, t, a = 'middle', c = '#220901') => `<text x="${x}" y="${y}" text-anchor="${a}" font-size="13" font-weight="600" fill="${c}" font-family="Inter,system-ui">${esc(t)}</text>`;
+  const svg = `<svg class="plate" viewBox="0 0 880 440" role="img" aria-label="Floor plate, ${g ? 'ground floor' : 'Level ' + f}">
+   <rect x="20" y="20" width="840" height="400" rx="14" fill="${f === '22' ? '#FBEAE7' : '#FAF8F7'}" stroke="#D8CFC9" stroke-width="2"/>
+   ${L(180, 56, g ? 'Lobby' : 'Meridian Legal', 'middle', '#6B5C55')}${L(700, 56, g ? 'Retail' : 'Kestrel Analytics', 'middle', '#6B5C55')}
+   <rect x="330" y="140" width="220" height="160" rx="8" fill="#F0ECE9" stroke="#D8CFC9"/>
+   <rect x="370" y="175" width="140" height="90" rx="6" fill="#fff" stroke="#621708" stroke-width="2"/>${L(440, 215, N.lift)}${L(440, 234, 'Fire lift', 'middle', '#6B5C55')}
+   <rect x="60" y="170" width="120" height="100" rx="6" fill="#fff" stroke="#220901" stroke-width="2"/>${L(120, 214, N.stairA)}${L(120, 234, 'Occupants down', 'middle', '#6B5C55')}
+   <rect x="700" y="170" width="120" height="100" rx="6" fill="#fff" stroke="#220901" stroke-width="2"/>${L(760, 214, N.stairB)}${L(760, 234, 'Crews up', 'middle', '#6B5C55')}
+   ${g ? '' : `<circle cx="215" cy="220" r="12" fill="#F6AA1C"/><text x="215" y="225" text-anchor="middle" font-size="12" font-weight="800" fill="#220901">W</text>${L(215, 300, N.wpA)}
+   <circle cx="665" cy="220" r="12" fill="#F6AA1C"/><text x="665" y="225" text-anchor="middle" font-size="12" font-weight="800" fill="#220901">W</text>${L(665, 300, N.wpB)}`}
+   ${g ? `<rect x="380" y="396" width="120" height="24" rx="4" fill="#BC3908"/>${L(440, 413, 'Main entrance', 'middle', '#fff')}${L(440, 385, N.access)}
+   <rect x="560" y="330" width="170" height="44" rx="6" fill="#fff" stroke="#621708" stroke-width="2"/>${L(645, 357, N.fcc)}
+   <path d="M780 400 L840 400" stroke="#1E7A4C" stroke-width="3" marker-end="url(#ar)"/><defs><marker id="ar" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#1E7A4C"/></marker></defs>${L(810, 385, N.assembly + ', outside', 'end', '#1E7A4C')}` : ''}
+   ${f === '22' ? L(850, 410, 'Fire floor in this demo', 'end', '#941B0C') : ''}</svg>`;
+  const mk = (k, type, color) => `<div class="mk"><span class="sw" style="background:${color}"></span><div><small>${type}</small>${sec ? `<label class="sr" for="mk-${k}">${type} name</label><input id="mk-${k}" data-in="mapname" data-k="${k}" value="${esc(N[k])}">` : `<b>${esc(N[k])}</b>`}</div></div>`;
+  const floors = ['G', ...Array.from({ length: FLOORS }, (_, i) => String(i + 1))];
+  return `<div class="page"><div class="mgrid"><section class="card"><div class="toolbar">
+   <div class="field" style="margin:0"><label class="lab" for="map-tower">Building and tower</label><select id="map-tower" class="inp" data-in="maptower">${TOWERS.map(t => `<option ${S.map.tower === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+   <div class="field" style="margin:0"><label class="lab" for="map-floor">Floor</label><select id="map-floor" class="inp" data-in="mapfloor">${floors.map(x => `<option value="${x}" ${f === x ? 'selected' : ''}>${x === 'G' ? 'Ground floor' : 'Level ' + x}</option>`).join('')}</select></div>
+   <span class="fine" style="margin-left:auto">${sec ? 'Marker names update the plan and the drawing.' : 'Read only for the Bomba commander.'}</span></div>
+   <div class="card-b">${svg}</div></section>
+  <div class="dcol"><section class="card"><div class="card-h"><h2>Markers</h2></div>${mk('stairA', 'Stairwell', '#220901')}${mk('stairB', 'Stairwell', '#220901')}${mk('lift', 'Fire lift lobby', '#621708')}${mk('wpA', 'Waiting point', '#F6AA1C')}${mk('wpB', 'Waiting point', '#F6AA1C')}${mk('assembly', 'Assembly point', '#1E7A4C')}${mk('access', 'Bomba access point', '#BC3908')}${mk('fcc', 'Fire command centre', '#621708')}</section>
+  <section class="card card-b"><div class="sec-t">Evacuation chairs</div><span class="chip wait"><span class="ci">${ic('alert', 11)}</span>Evacuation chairs: none installed (recommended)</span><p class="fine" style="margin-top:8px">Only Bomba or specialist rescue teams carry occupants. Building ERT does not.</p></section></div></div></div>`;
+}
+
+/* ============ Team settings ============ */
+function teamsPage() {
+  if (!isSec()) return locked();
+  const sel = (t, k, vals) => `<select class="inp" data-in="teamset" data-id="${t.id}" data-k="${k}" aria-label="${k} for ${t.name}">${vals.map(v => `<option ${t[k] === v ? 'selected' : ''}>${v}</option>`).join('')}</select>`;
+  return `<div class="page"><div class="page-h"><div><h2>Response teams</h2><p class="sub">Contact channel and availability for each team. Relay never stores or shows team staff numbers.</p></div></div>
+  <section class="card"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Team name</th><th>Category</th><th>Contact channel</th><th>Availability</th><th>Default for a fire</th></tr></thead><tbody>
+  ${S.teams.map(t => `<tr><td><b>${t.name}</b>${t.note ? `<div class="fine">${t.note}</div>` : ''}</td><td>${t.cat}</td><td>${sel(t, 'channel', ['Relay link, SMS fallback', 'Relay link, radio channel 2', 'Phone, SMS fallback'])}</td><td>${sel(t, 'avail', ['Available', 'Busy', 'Off duty'])}</td><td>${t.id === 'pdrm' ? 'No' : 'Yes'}</td></tr>`).join('')}
+  </tbody></table></div></section></div>`;
+}
+
+/* ============ People, visitors, audit, components ============ */
+function peoplePage() {
+  if (!isSec()) return locked();
+  const q = S.pplQ.toLowerCase();
+  const list = S.people.filter(p => (S.pplCo === 'all' || p.c === S.pplCo) && (!q || p.n.toLowerCase().includes(q) || p.c.toLowerCase().includes(q)));
+  const cos = [...new Set(S.people.map(p => p.c))];
+  return `<div class="page"><section class="card"><div class="toolbar">
+   <label class="sr" for="ppl-q">Search people</label><input id="ppl-q" class="inp" data-in="pplq" placeholder="Search by name or company" value="${esc(S.pplQ)}">
+   <label class="sr" for="ppl-co">Company</label><select id="ppl-co" class="inp" data-in="pplco"><option value="all">All companies</option>${cos.map(c => `<option ${S.pplCo === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
+   <span class="fine" style="margin-left:auto">${list.length} of ${S.people.length}. Opening a profile is recorded in the audit log.</span></div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Name</th><th>Company</th><th>Tower and floor</th><th>Assistance profile</th><th>Access permissions</th>${S.incident ? '<th>Current status</th>' : ''}</tr></thead><tbody>
+  ${list.map(p => `<tr class="click" data-act="person" data-id="${p.id}" tabindex="0"><td><b>${esc(p.n)}</b></td><td>${esc(p.c)}</td><td>${TOWER}, L${p.floor}</td><td>${p.profile === 'None' ? '<span class="fine">None</span>' : `<span class="tag amber">${esc(p.profile)}</span>`}</td>
+  <td class="fine">Location shared during incidents. Name visible to UOA Security; Bomba in Details only.</td>${S.incident ? `<td>${chip(p.status)}</td>` : ''}</tr>`).join('')}</tbody></table></div></section></div>`;
+}
+function qrSvg() {
+  let r = ''; let seed = 7;
+  for (let y = 0; y < 21; y++) for (let x = 0; x < 21; x++) {
+    const fin = (x < 7 && y < 7) || (x > 13 && y < 7) || (x < 7 && y > 13);
+    let on;
+    if (fin) { const lx = x > 13 ? x - 14 : x, ly = y > 13 ? y - 14 : y; on = lx === 0 || lx === 6 || ly === 0 || ly === 6 || (lx > 1 && lx < 5 && ly > 1 && ly < 5); }
+    else { seed = (seed * 9301 + 49297) % 233280; on = seed / 233280 > .55; }
+    if (on) r += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+  }
+  return `<svg class="qr" viewBox="-1 -1 23 23" role="img" aria-label="Visitor check-in QR code"><rect x="-1" y="-1" width="23" height="23" fill="#fff"/><g fill="#220901">${r}</g></svg>`;
+}
+function visitorsPage() {
+  if (!isSec()) return locked();
+  return `<div class="page"><div class="grid"><section class="card c8"><div class="card-h"><div><h2>Visitors today</h2><p class="sub">${TODAY}. Checked in by QR at the lobby.</p></div></div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Visitor</th><th>Visiting</th><th>Floor</th><th>QR check-in</th><th>Checked out</th><th>Current status</th></tr></thead><tbody>
+  ${S.visitors.map(v => `<tr><td><b>${esc(v.n)}</b></td><td>${esc(v.host)}</td><td>L${v.floor}</td><td>${v.qr}</td><td>${v.out || '<span class="fine">Not yet</span>'}</td><td>${/safe/i.test(v.status) ? chip('safe') : `<span class="chip plain">${esc(v.status)}</span>`}</td></tr>`).join('')}</tbody></table></div></section>
+  <section class="card c4 card-b" style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center"><div class="sec-t" style="align-self:flex-start">QR check-in</div>${qrSvg()}<b>UOA Corporate Tower, main lobby</b><p class="fine">Visitors scan to check in. During an incident they get the same alert and can check in safe at the assembly point.</p></section></div></div>`;
+}
+function auditPage() {
+  if (!isSec()) return locked();
+  return `<div class="page"><section class="card"><div class="card-h"><div><h2>Audit log</h2><p class="sub">Read only. Newest first. Every opening of a person's details is recorded.</p></div><span class="fine">${S.audit.length} entries</span></div>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Time</th><th>User</th><th>Role</th><th>Action</th><th>Person whose details were accessed</th></tr></thead><tbody>
+  ${S.audit.length ? S.audit.map(a => `<tr><td>${a.t}</td><td>${esc(a.user)}</td><td>${esc(a.role)}</td><td>${esc(a.action)}</td><td>${a.person ? esc(a.person) : '<span class="fine">None</span>'}</td></tr>`).join('') : '<tr><td colspan="5" class="fine">No entries yet.</td></tr>'}</tbody></table></div></section></div>`;
+}
+function componentsPage() {
+  const sw = (n, v, use) => `<div class="swatch"><span style="background:${v}"></span><b>${n}</b><span style="height:auto;border:0" class="fine">${v}. ${use}</span></div>`;
+  return `<div class="page"><div class="grid">
+  <section class="card c12 card-b"><div class="sec-t">Brand palette</div><div class="grid">${[['Dark espresso', '#220901', 'Text, headings, sidebar'], ['Deep brown', '#621708', 'Primary buttons, active nav'], ['Emergency red', '#941B0C', 'Critical, unaccounted for'], ['Burnt orange', '#BC3908', 'Live banner, urgent items only'], ['Amber yellow', '#F6AA1C', 'Waiting for help, caution']].map(x => `<div class="c3" style="grid-column:span 2">${sw(...x)}</div>`).join('')}<div style="grid-column:span 2">${sw('Safe green', '#1E7A4C', 'Functional status only')}</div></div></section>
+  <section class="card c6 card-b"><div class="sec-t">Buttons</div><div class="comp-row"><button class="btn primary">${ic('send', 15)}Send for review</button><button class="btn">${ic('edit', 15)}Edit</button><button class="btn ghost">Cancel</button><button class="btn urgent">${ic('flame', 15)}Trigger fire on Level 22</button></div>
+  <div class="comp-row" style="margin-top:10px"><button class="btn" disabled aria-describedby="cw">Send update</button><span class="why" id="cw">Disabled buttons always say why.</span></div>
+  <div class="sec-t" style="margin-top:16px">Writing rules</div><p class="fine">Sentence case. Labels say exactly what happens. Never "Approve", "Order" or "Dispatch orders". No responder headcounts.</p></section>
+  <section class="card c6 card-b"><div class="sec-t">Occupant status</div><div class="comp-row">${chip('waiting')}${chip('safe')}${chip('unacc')}<span class="chip urgent"><span class="ci">${ic('alert', 11)}</span>Not acknowledged</span></div>
+  <div class="sec-t" style="margin-top:16px">Team status</div><div class="comp-row">${TORDER.map(s => tchip({ status: s })).join('')}</div><p class="fine" style="margin-top:8px">Status is always colour plus icon plus label.</p></section>
+  ${statCard('wait', 1, 'Example stat card.')}${statCard('safe', 10, 'Checked in at Assembly point A.')}${statCard('un', 2, 'No check-in since the alert.')}
+  <section class="card c3 card-b"><div class="sec-t">Tags</div><div class="comp-row"><span class="tag ai">AI-generated</span><span class="tag brown">For review only</span><span class="tag fire">Fire floor</span><span class="tag amber">Updated from live data</span><span class="tag orange">Not sent</span></div></section>
+  <section class="card c6"><div class="sec-t" style="padding:14px 16px 0">Plan line states</div><ol class="plan-lines" style="padding:8px 10px 14px"><li class="pl"><span class="n">1</span><div class="tx">Default line.</div></li><li class="pl flash"><span class="n">2</span><div class="tx">Line changed by live data<span class="tags"><span class="tag amber">Updated from live data</span></span></div></li><li class="pl issue"><span class="n">3</span><div class="tx">Line that failed a check<div class="iss">${ic('alert', 14)}Says 3 unaccounted. Live data shows 2.</div></div></li></ol></section>
+  <section class="card c6 card-b"><div class="sec-t">Feedback</div><div class="toast" style="animation:none">${ic('checkc', 16)}<span>Toast: plan sent for review to 6 teams.</span></div><div style="margin-top:10px">${disclaimer().replace('class="disc"', 'class="disc" style="margin:0"')}</div><div class="infobox" style="margin-top:10px">${ic('wifioff', 16)}If data drops, teams get a text summary every 60 seconds.</div></section>
+  </div></div>`;
+}
+
+/* ============ Modals, drawers, toasts ============ */
+let lastFocus = null;
+function openModal(html, o = {}) {
+  lastFocus = document.activeElement;
+  $('#modal-root').innerHTML = `<div class="ov ${o.drawer ? 'ov-drawer' : ''}" data-act="ovclose"><div class="${o.drawer ? 'drawer' : 'dialog'} ${o.wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-labelledby="dlg-t" tabindex="-1">${html}</div></div>`;
+  const d = $('#modal-root [role=dialog]');
+  const f = d.querySelector('[data-autofocus]') || d.querySelector('button,input,textarea,select');
+  (f || d).focus();
+}
+function closeModal() {
+  $('#modal-root').innerHTML = '';
+  document.body.classList.remove('print-report');
+  const id = lastFocus && lastFocus.id, el = id && document.getElementById(id);
+  if (el) el.focus(); else if (lastFocus && document.body.contains(lastFocus)) lastFocus.focus(); else { const m = $('#main'); m && m.focus(); }
+}
+const dlgHead = (t, sub = '') => `<div class="dlg-h"><div><h2 id="dlg-t">${t}</h2>${sub ? `<p class="sub">${sub}</p>` : ''}</div><button class="icon-btn" data-act="close" aria-label="Close">${ic('x', 16)}</button></div>`;
+function toast(msg) {
+  const el = document.createElement('div'); el.className = 'toast';
+  el.innerHTML = `${ic('checkc', 16)}<span>${esc(msg)}</span>`;
+  $('#toast-root').appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 300); }, 4200);
+}
+function triggerDialog() {
+  openModal(`${dlgHead('Trigger a fire on Level 22?')}<div class="dlg-b"><p>This starts a fire incident for UOA Corporate Tower, Level 22. Relay alerts the 13 occupants on that floor and drafts a response plan for your review.</p><div class="infobox">${ic('info', 16)}Demo: the incident opens 5 minutes in, with check-ins already received. About 15 seconds later, Amirul Hakim checks in safe.</div></div>
+  <div class="dlg-f"><button class="btn" data-act="close" data-autofocus>Cancel</button><button class="btn urgent" data-act="confirmtrigger">${ic('flame', 15)}Trigger fire on Level 22</button></div>`);
+}
+function endDialog() {
+  openModal(`${dlgHead('End this incident?')}<div class="dlg-b"><p>Relay stops live updates and tells occupants and teams the incident has ended. The full timeline stays in the incident log.</p><p class="fine">Still unaccounted for: ${counts().un}. Waiting for help: ${counts().wait}.</p></div>
+  <div class="dlg-f"><button class="btn" data-act="close" data-autofocus>Cancel</button><button class="btn primary" data-act="confirmend">End incident</button></div>`);
+}
+function sendDialog(isUpdate) {
+  const P = S.plan, sel = S.teams.filter(t => t.sel), issues = planIssues(), ch = pendingChanges();
+  const lines = isUpdate ? ch.map(i => `<li value="${i + 1}">${esc(P.lines[i].text)}</li>`).join('') : P.lines.map(l => `<li>${esc(l.text)}</li>`).join('');
+  openModal(`${dlgHead(isUpdate ? 'Send plan update for review' : 'Send plan for review', isUpdate ? 'Only the changed lines are highlighted for teams.' : 'The same five lines go to every selected team.')}
+  <div class="dlg-b"><div><div class="sec-t">${isUpdate ? 'Changed lines' : 'Plan'}</div><ol class="mini-ol">${lines}</ol></div>
+  <div><div class="sec-t">To ${sel.length} team${sel.length === 1 ? '' : 's'}</div><div class="comp-row">${sel.map(t => `<span class="tag">${t.name}</span>`).join('')}</div></div>
+  ${issues.length ? `<div class="warnbox">${ic('alert', 16)}<span>${issues.length} check${issues.length > 1 ? 's' : ''} failed. Fix the flagged lines before sending.<br>${issues.map(x => `Line ${x.i + 1}: ${esc(x.msg)}`).join('<br>')}</span></div>`
+      : `<label class="check"><input type="checkbox" id="rev-check" data-in="revcheck"><span><b>I have reviewed these lines against the live picture.</b><br><span class="fine">The plan is advice. Teams can follow, change or ignore it. The commander decides lift or stairs.</span></span></label>`}</div>
+  <div class="dlg-f"><button class="btn" data-act="close" data-autofocus>Cancel</button><button class="btn primary" id="confirm-send" data-act="${isUpdate ? 'confirmupdate' : 'confirmsend'}" disabled>${ic('send', 15)}${isUpdate ? 'Send update' : `Send for review to ${sel.length} teams`}</button></div>`);
+}
+function personDrawer(id) {
+  const p = person(id); if (!p) return;
+  audit('Opened person details', p.n);
+  const hist = S.events.filter(e => e.person === p.id);
+  openModal(`${dlgHead(esc(p.n), esc(p.c))}<div class="dlg-b">${chip(p.status)}
+  <dl class="kv"><dt>Tower and floor</dt><dd>${TOWER}, Level ${p.floor}</dd><dt>Last known location</dt><dd>${esc(p.loc)}</dd><dt>Last updated</dt><dd>${p.t === 'None' ? 'None. No update since sign-in.' : p.t}</dd><dt>Source</dt><dd>${esc(p.src || 'None')}</dd>
+  ${p.status === 'waiting' ? `<dt>Stated need</dt><dd>${esc(p.need || 'Not stated')}</dd><dt>Acknowledged</dt><dd>${p.acked ? esc(p.ackBy || 'Yes') : '<b style="color:var(--red)">Not yet</b>'}</dd>` : ''}
+  <dt>Assistance profile</dt><dd>${esc(p.profile)}</dd></dl>
+  ${hist.length ? `<div><div class="sec-t">Updates</div><ol class="tl" style="padding:0">${hist.slice().reverse().map(e => `<li style="padding:6px 0"><time>${e.t}</time><span class="fi-ic">${ic(CATS[e.cat].i, 14)}</span><p>${esc(e.text)}</p></li>`).join('')}</ol></div>` : ''}
+  <div class="infobox">${ic('shield', 16)}Opening these details was recorded in the audit log: ${esc(me().name)}, ${now()}.</div></div>
+  <div class="dlg-f">${p.status === 'waiting' && !p.acked && isSec() ? `<button class="btn urgent" data-act="ack" data-id="${p.id}">Acknowledge help request</button>` : ''}<button class="btn" data-act="close" data-autofocus>Close</button></div>`, { drawer: true });
+}
+function planDrawer() {
+  const P = S.plan; if (!P) return;
+  audit('Opened plan details (contains names)', S.people.filter(p => p.status !== 'safe').map(p => p.n).join(', '));
+  const lines = isSec() || !P.sentLines ? P.lines.map(l => l.text) : P.sentLines;
+  const iss = verify(lines), c = counts(FIRE_FLOOR), N = S.map.names;
+  const w = S.people.filter(p => p.status === 'waiting'), u = S.people.filter(p => p.status === 'unacc').sort((a, b) => toSec(b.t) - toSec(a.t));
+  const srcs = [`Building map: ${N.access}; ${N.fcc}.`, 'Building map: staging two floors below the fire floor (Level 20). Building ERT stays off the fire floor.', `Building map: ${N.stairB} for crews, ${N.stairA} for evacuation.`,
+    `Live data: ${w.length} waiting. ${w.map(p => `${esc(p.n)}, ${esc(p.loc)}. ${esc(p.need)}`).join(' ')}`, `Live data: ${c.un} unaccounted, most recent first: ${u.map(p => `${esc(p.n)} (${p.t === 'None' ? 'no update since sign-in' : 'last seen ' + p.t})`).join(', ') || 'none'}. EMRS to ${N.assembly}.`];
+  const ck = (ok, t) => `<li>${ok ? `<span class="ok">${ic('checkc', 16)}</span>` : `<span class="bad">${ic('alert', 16)}</span>`}<span>${t}</span></li>`;
+  openModal(`${dlgHead('Plan details', 'Where each line comes from, and the checks Relay ran')}<div class="dlg-b">
+  <ol class="mini-ol">${lines.map((t, i) => `<li><b>${esc(t)}</b><div class="fine">${srcs[i]}</div></li>`).join('')}</ol>
+  <div><div class="sec-t">Verification, ${P.verifiedAt}</div><ul class="checks">
+  ${ck(!iss.some(x => x.i === 3 && /waiting/.test(x.msg)), `Waiting count matches live data (${c.wait})`)}${ck(!iss.some(x => x.i === 4 && /unaccounted/.test(x.msg)), `Unaccounted count matches live data (${c.un})`)}
+  ${ck(!iss.some(x => /number/.test(x.msg)), 'No responder or vehicle numbers')}${ck(!iss.some(x => /ERT/.test(x.msg)), 'Building ERT kept off the fire floor')}${ck(lines.length <= 5, 'Five lines or fewer')}
+  ${ck(true, 'Lift or stairs left to the commander')}</ul></div>
+  <div class="infobox">${ic('info', 16)}Counts come from Relay check-ins only. The AI writes the wording; it never estimates how many people are inside.</div>
+  <div class="infobox">${ic('shield', 16)}This view shows names. Opening it was recorded in the audit log.</div></div>
+  <div class="dlg-f"><button class="btn" data-act="close" data-autofocus>Close</button></div>`, { drawer: true });
+}
+
+/* ============ Bomba report ============ */
+function reportData() {
+  const P = S.plan, lines = P ? (P.sentLines && !isSec() ? P.sentLines : P.lines.map(l => l.text)) : [];
+  const rem = S.people.filter(p => p.status !== 'safe');
+  const floors = [...new Set(rem.map(p => p.floor))].sort((a, b) => b - a);
+  return { lines, rem, floors, c: counts(), t: now() };
+}
+function reportText() {
+  const d = reportData();
+  let s = `Relay report for Bomba\nFire, UOA Corporate Tower, Level 22. ${TODAY}. Generated ${d.t} by ${me().name}, ${me().role}.\n\nResponse plan (AI-generated, for review only)\n`;
+  d.lines.forEach((l, i) => { s += `${i + 1}. ${l}\n`; });
+  s += `\nStill inside or not confirmed: ${d.rem.length}. ${d.c.wait} waiting for help, ${d.c.un} unaccounted for.\n`;
+  d.floors.forEach(f => { s += `\nLevel ${f}\n`; d.rem.filter(p => p.floor === f).forEach(p => { s += `- ${OST[p.status].label}: ${p.n}, ${p.c}. ${p.loc}, ${p.t === 'None' ? 'no update since sign-in' : p.t}.${p.status === 'waiting' && p.need ? ' Need: ' + p.need : ''}\n`; }); });
+  return s + '\nUnaccounted for means no check-in since the alert. It does not confirm the person is inside.';
+}
+function reportDialog() {
+  if (!S.incident) return;
+  const d = reportData();
+  audit('Opened report for Bomba (contains names)', d.rem.map(p => p.n).join(', '));
+  const sh = S.reportShared;
+  openModal(`${dlgHead('Share report with Bomba', 'Print-friendly. Reads in black and white.')}
+  <div class="dlg-b" style="padding-bottom:0"><div class="rp-toolbar"><button class="btn" data-act="copyreport" id="copy-btn">${ic('copy', 15)}Copy report</button><button class="btn" data-act="printreport">${ic('print', 15)}Print</button>
+  ${sh ? `<button class="btn" disabled>${ic('check', 15)}Shared with Bomba at ${sh}</button>` : `<button class="btn primary" data-act="markshared">Mark as shared with Bomba</button>`}<span class="fine" style="margin-left:auto">${sh ? 'Added to the incident log.' : 'Not yet shared'}</span></div></div>
+  <div class="paper" id="report-paper"><h1>Relay report for Bomba</h1><div class="rp-meta"><span>Fire, UOA Corporate Tower, Level 22</span><span>${TODAY}</span><span>Generated ${d.t}</span><span>${me().name}, ${me().role}</span></div>
+  <h3>Response plan (AI-generated, for review only)</h3><ol>${d.lines.map(l => `<li>${esc(l)}</li>`).join('')}</ol>
+  <h3>Remaining occupants by floor</h3><p>Still inside or not confirmed: <b>${d.rem.length}</b>. ${d.c.wait} waiting for help, ${d.c.un} unaccounted for. Counts from Relay check-ins.</p>
+  ${d.floors.map(f => `<h3>Level ${f}${f === FIRE_FLOOR ? ' (fire floor)' : ''}</h3><table><thead><tr><th>Status</th><th>Name</th><th>Company</th><th>Last known location</th><th>Stated need</th></tr></thead><tbody>
+  ${d.rem.filter(p => p.floor === f).sort((a, b) => (a.status === 'waiting' ? -1 : 1) - (b.status === 'waiting' ? -1 : 1) || toSec(b.t) - toSec(a.t)).map(p => `<tr><td><b>${OST[p.status].label}</b></td><td>${esc(p.n)}</td><td>${esc(p.c)}</td><td>${esc(p.loc)}, ${p.t === 'None' ? 'no update since sign-in' : p.t}</td><td>${p.status === 'waiting' ? esc(p.need || 'Not stated') : ''}</td></tr>`).join('')}</tbody></table>`).join('')}
+  <p style="margin-top:14px">Unaccounted for means no check-in since the alert. It does not confirm the person is inside. Waiting points and the fire lift lobby are marked on the Level 22 floor plan.</p></div>`, { wide: true });
+}
+
+/* ============ Render ============ */
+function page() {
+  switch (S.route) {
+    case 'dispatch': return dispatch(); case 'log': return logPage(); case 'map': return mapPage(); case 'teams': return teamsPage();
+    case 'people': return peoplePage(); case 'visitors': return visitorsPage(); case 'audit': return auditPage(); case 'components': return componentsPage();
+    default: return dashboard();
+  }
+}
+function render() {
+  const ae = document.activeElement, fid = ae && ae.id;
+  let selR = null; try { if (fid && ae.selectionStart != null) selR = [ae.selectionStart, ae.selectionEnd]; } catch (e) { }
+  const sc = {}; document.querySelectorAll('#app [data-scroll]').forEach(el => { sc[el.dataset.scroll] = el.scrollTop; });
+  $('#app').innerHTML = S.signedIn ? `<div class="app">${sidebar()}<div class="mainwrap">${header()}${banner()}<main class="scroll" id="main" data-scroll="main" tabindex="-1">${page()}</main></div></div>` : login();
+  document.querySelectorAll('#app [data-scroll]').forEach(el => { if (sc[el.dataset.scroll] != null) el.scrollTop = sc[el.dataset.scroll]; });
+  if (fid && !$('#modal-root').contains(ae)) { const el = document.getElementById(fid); if (el) { el.focus({ preventScroll: true }); if (selR) try { el.setSelectionRange(...selR); } catch (e) { } } }
+}
+function route() {
+  const h = location.hash.slice(1) || 'dashboard';
+  S.route = TITLES[h] ? h : 'dashboard'; S.notifOpen = false;
+  const changed = S.route !== S.prevRoute; S.prevRoute = S.route;
+  render();
+  if (changed) { const m = $('#main'); if (m) m.scrollTop = 0; }
+}
+window.addEventListener('hashchange', route);
+
+/* ============ Actions ============ */
+const ACT = {
+  signout() { audit('Signed out'); S.signedIn = false; location.hash = ''; render(); },
+  bell() { S.notifOpen = !S.notifOpen; if (S.notifOpen) S.unread = 0; render(); },
+  trigger: triggerDialog,
+  confirmtrigger() { closeModal(); startIncident('security'); toast('Fire incident started on Level 22.'); },
+  end: endDialog,
+  confirmend() { closeModal(); endIncident('security'); },
+  reset() { resetDemo(); toast('Demo cleared. The incident is saved in the incident log.'); },
+  close: closeModal,
+  ovclose(el, e) { if (e.target === el) closeModal(); },
+  floor(el, e) { e.stopPropagation(); const f = el.dataset.f; S.selFloor = f === '' || +f === S.selFloor ? null : +f; render(); },
+  allfloors() { S.allFloors = !S.allFloors; render(); },
+  safeopen() { S.safeOpen = !S.safeOpen; render(); },
+  person(el) { personDrawer(el.dataset.id); render(); },
+  ack(el) { ackHelp(el.dataset.id); if ($('#modal-root').innerHTML) closeModal(); },
+  edit() { const P = S.plan; P.editing = true; P.buf = P.lines.map(l => l.text); render(); const t = $('#pl-0'); t && t.focus(); },
+  canceledit() { S.plan.editing = false; S.plan.buf = null; render(); const b = $('#edit-plan'); b && b.focus(); },
+  resetline(el) { const i = +el.dataset.i; S.plan.buf[i] = S.plan.lines[i].auto; render(); const t = $('#pl-' + i); t && t.focus(); },
+  saveedit() {
+    const P = S.plan; let n = 0;
+    P.buf.forEach((v, i) => {
+      const L = P.lines[i], txt = v.trim() || L.auto;
+      if (txt !== L.text) { L.text = txt; n++; addEvent('plan', `${me().name}, UOA Security`, `Edited line ${i + 1}: "${txt}"`, { delivery: P.sentAt ? 'Not yet sent to teams' : 'Draft' }); }
+      L.edited = L.text !== L.auto;
+    });
+    P.editing = false; P.buf = null; if (n) { P.updatedAt = now(); audit(`Edited ${n} plan line${n > 1 ? 's' : ''}`); }
+    toast(n ? `${n} line${n > 1 ? 's' : ''} saved. ${planIssues().length ? 'Some checks failed.' : 'Checks passed.'}` : 'No changes.'); render(); const b = $('#edit-plan'); b && b.focus();
+  },
+  sendreview() { sendDialog(false); },
+  sendupdate() { sendDialog(true); },
+  confirmsend() { closeModal(); doSend(false); },
+  confirmupdate() { closeModal(); doSend(true); },
+  plandetails() { planDrawer(); },
+  reply(el) { const k = el.dataset.k; if (k === 'changed') { S.replyOpen = true; render(); const t = $('#reply-note'); t && t.focus(); } else sendReply(k); },
+  replychanged() { sendReply('changed'); S.replyNote = ''; render(); },
+  replycancel() { S.replyOpen = false; render(); },
+  report: reportDialog,
+  copyreport() {
+    const txt = reportText(), ok = () => { toast('Report copied.'); audit('Copied report for Bomba'); };
+    const fallback = () => { const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); let r = false; try { r = document.execCommand('copy'); } catch (e) { } ta.remove(); r ? ok() : toast("Couldn't copy. Select the report text and copy it."); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(ok, fallback); else fallback();
+  },
+  printreport() { document.body.classList.add('print-report'); audit('Printed report for Bomba'); window.print(); },
+  markshared() { S.reportShared = now(); addEvent('report', me().name, 'Report marked as shared with Bomba.', { delivery: 'Logged' }); audit('Marked report as shared with Bomba'); closeModal(); reportDialog(); render(); },
+  feedf(el) { S.feedF = el.dataset.k; render(); },
+  seldefault() { S.teams.forEach(t => { t.sel = t.id !== 'pdrm'; }); render(); },
+  logsel(el) { S.logSel = el.dataset.id; render(); }
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (S.notifOpen && !e.target.closest('.notif')) { S.notifOpen = false; if (!el) { render(); return; } }
+  if (!el || el.disabled) return;
+  const f = ACT[el.dataset.act]; if (!f) return;
+  if (el.tagName === 'A') e.preventDefault();
+  f(el, e);
+});
+window.addEventListener('afterprint', () => document.body.classList.remove('print-report'));
+
+const IN = {
+  role(el) { S.role = el.value; audit('Switched role to ' + me().role); S.replyOpen = false; if (S.plan) { S.plan.editing = false; } render(); toast(`Viewing as ${me().role}. Live data unchanged.`); },
+  loginrole(el) { S.loginRole = el.value; render(); },
+  teamsel(el) { const t = team(el.dataset.id); t.sel = el.checked; render(); },
+  composer(el) { S.composer = el.value; if (S.composerErr) { S.composerErr = ''; } },
+  composerTo(el) { S.composerTo = el.value; },
+  planbuf(el) { S.plan.buf[+el.dataset.i] = el.value; },
+  lift(el) { S.liftChoice = el.value; addEvent('reply', `${USERS.bomba.name}, Bomba IC`, `Line 4 decision recorded: ${el.value}.`, { delivery: 'Visible to UOA Security', notify: true }); render(); },
+  replynote(el) { S.replyNote = el.value; },
+  revcheck(el) { const b = $('#confirm-send'); if (b) b.disabled = !el.checked; },
+  lf(el) { S.lf[el.dataset.k] = el.value; render(); },
+  mapname(el) { S.map.names[el.dataset.k] = el.value; render(); },
+  maptower(el) { S.map.tower = el.value; render(); },
+  mapfloor(el) { S.map.floor = el.value; render(); },
+  teamset(el) { const t = team(el.dataset.id); t[el.dataset.k] = el.value; audit(`Changed ${el.dataset.k === 'avail' ? 'availability' : 'contact channel'} for ${t.name}`); toast(`${t.name} updated.`); render(); },
+  pplq(el) { S.pplQ = el.value; render(); },
+  pplco(el) { S.pplCo = el.value; render(); }
+};
+const CHANGE_ONLY = el => el.type === 'checkbox' || el.type === 'radio' || el.tagName === 'SELECT';
+document.addEventListener('input', e => { const el = e.target, k = el.dataset && el.dataset.in; if (k && IN[k] && !CHANGE_ONLY(el)) IN[k](el, e); });
+document.addEventListener('change', e => { const el = e.target, k = el.dataset && el.dataset.in; if (k && IN[k] && CHANGE_ONLY(el)) IN[k](el, e); });
+document.addEventListener('submit', e => {
+  const f = e.target.dataset.submit; if (!f) return; e.preventDefault();
+  if (f === 'signin') { S.signedIn = true; S.role = S.loginRole; audit('Signed in'); if (!location.hash || location.hash === '#') location.hash = '#dashboard'; route(); const m = $('#main'); m && m.focus(); }
+  if (f === 'sendmsg') {
+    const txt = S.composer.trim();
+    if (!txt) { S.composerErr = 'Write a message first.'; render(); return; }
+    if (HEADCOUNT.test(txt)) { S.composerErr = "Remove responder or vehicle numbers. Relay doesn't send headcounts."; render(); return; }
+    const to = S.composerTo === 'selected' ? S.teams.filter(t => t.sel) : [team(S.composerTo)];
+    const ev = addEvent('message', `${me().name}, ${me().role}`, txt, { delivery: 'Sending' });
+    later(() => { ev.delivery = `Delivered to ${to.map(t => t.name).join(', ')}`; render(); }, 1200);
+    S.composer = ''; S.composerErr = ''; render();
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if ($('#modal-root').innerHTML) { closeModal(); return; } if (S.notifOpen) { S.notifOpen = false; render(); $('#bell') && $('#bell').focus(); } }
+  if (e.key === 'Tab') {
+    const d = $('#modal-root [role=dialog]'); if (!d) return;
+    const f = [...d.querySelectorAll('button:not([disabled]),input,textarea,select,a[href]')]; if (!f.length) return;
+    if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+  }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr[data-act]')) { e.preventDefault(); ACT[e.target.dataset.act](e.target, e); }
+});
+
+/* ============ Live link with the Relay customer app ============ */
+if (bc) bc.onmessage = ({ data: m }) => {
+  if (!m || !m.type) return;
+  S.linked = true;
+  const live = S.incident && !S.incident.endMs;
+  switch (m.type) {
+    case 'incident.start': if (!live) startIncident('customer'); break;
+    case 'incident.end': if (live) endIncident('customer'); break;
+    case 'help.request': helpRequest(m.person, m.where, m.floor); break;
+    case 'help.cancel': helpCancel(m.person); break;
+    case 'help.ack': { const p = byName(m.person); if (p && live) { p.acked = true; p.ackBy = `${m.by}, ${now()}`; addEvent('help', m.by || 'Responder', `Acknowledged help request from ${m.person}${m.eta ? '. Expected in ' + m.eta : ''}.`, { tb: `Acknowledged a help request on Level ${p.floor}.`, delivery: 'Received', person: p.id }); } break; }
+    case 'checkin': if (live) { if (/visitor/i.test(m.person)) S.visitors.push({ n: m.person, host: 'Not recorded', floor: 22, qr: now().slice(0, 5), out: '', status: 'Checked in safe' }); checkin(m.person, m.place || 'Assembly point A', !!m.gps); } break;
+    case 'leaving': { const p = byName(m.person); if (p && live && p.status !== 'safe') { p.loc = `Leaving Level ${m.floor} by the stairs`; p.t = now(); addEvent('checkin', p.n, `Leaving Level ${m.floor} by the stairs.`, { sb: 'Relay app', tb: `An occupant is leaving Level ${m.floor} by the stairs.`, delivery: 'Received', person: p.id }); } break; }
+    case 'report': if (live) addEvent('help', m.person, `Reported ${m.kind} on Level ${m.floor}.`, { sb: 'Relay app', tb: `Occupant reported ${m.kind} on Level ${m.floor}.`, delivery: 'Received', notify: true }); break;
+  }
+  render();
+};
+
+/* ============ Tick and start ============ */
+setInterval(() => { if (S.incident && !S.incident.endMs) document.querySelectorAll('[data-tick=elapsed]').forEach(el => { el.textContent = elapsedLabel(); }); }, 1000);
+route();
+</script>
+</body>
+</html>
