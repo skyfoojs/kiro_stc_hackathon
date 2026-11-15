@@ -55,10 +55,13 @@ Before declaring something done, run `npx tsc --noEmit` and `npx expo lint`.
 
 ## UI rules
 
-- The UI library is not chosen yet. Before building screens, pick ONE and install it with `npx expo install`, then update this section. Suggested: NativeWind or Uniwind (Tailwind for RN) + react-native-reusables (shadcn-style components), `lucide-react-native` for icons, `sonner-native` for toasts.
-- Until then: `StyleSheet.create` + shared theme constants. No hard-coded colors scattered across files.
-- Support dark mode (`userInterfaceStyle: automatic` is set). Respect safe areas (`react-native-safe-area-context`).
-- Never use `Alert.alert()` for routine feedback once a toast library is installed.
+- Styling: `StyleSheet.create` + tokens from `@/constants/theme` (colors, space, radius, type). No hard-coded colours or sizes in screens.
+- Design reference: `docs/appname-customer.html` (Relay prototype). Shared components live in `src/components/` (`AppButton`, `AppBar`, `ListRow`/`ListCard`, `Pill`, `Note`, `TextField`, `Ping`/`PingBust` mascot, `IncidentIcon`, `EmergencyBar`, `TowerStrip`, `FloorPlan`, `HoldToReport`). Reuse them instead of new one-off buttons or inputs.
+- Icons: `lucide-react-native` only, `ICON_STROKE` stroke width.
+- Animation: `react-native-reanimated` entering animations (`FadeInDown`, 300-400 ms, small stagger). Keep it subtle.
+- Light theme only (`userInterfaceStyle: light`), matching the Relay design. Emergency screens use `colors.alert` as the background.
+- Errors: inline text with a retry, never `Alert.alert()` for routine feedback. Respect safe areas (`react-native-safe-area-context`).
+- Copy: short and direct. Reports are unconfirmed, so alerts say "Fire reported", not "Fire", where space allows. Every report means evacuate.
 
 ## Demo-readiness
 
