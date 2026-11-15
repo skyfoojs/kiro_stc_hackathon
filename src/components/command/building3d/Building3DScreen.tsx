@@ -227,7 +227,65 @@ export default function Building3DScreen() {
       }}>
       <InfoBar snapshot={snapshot} />
 
-      <aside className="b3d-left" aria-label="Building overview">
+      <div className="b3d-top">
+        <div className="b3d-view">
+          <BuildingCanvas view={view} resets={sim.resets} apiRef={api} onSelect={select} onHover={setHover} />
+          {hover && <HoverCard hover={hover} snapshot={snapshot} summaries={summaries} canSee={canSee} />}
+          <div className="b3d-view-tools" role="toolbar" aria-label="View">
+            <button type="button" onClick={() => api.current?.resetCamera()}>
+              Reset view
+            </button>
+            <button type="button" aria-pressed={exploded} onClick={toggleExplode}>
+              {exploded ? 'Close floors' : 'Explode floors'}
+            </button>
+            <button type="button" aria-pressed={isolate} disabled={floor === null} onClick={() => setIsolate((x) => !x)}>
+              Isolate floor
+            </button>
+            {floor !== null && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFloor(null);
+                  setExploded(false);
+                  setIsolate(false);
+                  setSelection(null);
+                }}>
+                Clear floor L{floor}
+              </button>
+            )}
+          </div>
+          <p className="b3d-view-hint">Drag to rotate, scroll or pinch to zoom, right-drag to pan. Positions are approximate.</p>
+        </div>
+
+        <aside className="b3d-right" aria-label="Details">
+          {sel && (
+            <button type="button" className="b3d-link b3d-back" onClick={() => setSelection(null)}>
+              Back to overview
+            </button>
+          )}
+          {detail}
+        </aside>
+
+      </div>
+
+      <SimBar
+        mode={mode}
+        onMode={changeMode}
+        t={sim.t}
+        end={SIM_END}
+        playing={sim.playing}
+        speed={sim.speed}
+        onPlay={sim.play}
+        onPause={sim.pause}
+        onStep={sim.step}
+        onReset={sim.reset}
+        onSeek={sim.seek}
+        onSpeed={sim.setSpeed}
+        events={snapshot.events}
+        onEventFloor={goFloor}
+      />
+
+      <div className="b3d-bottom" aria-label="Building overview">
         <FloorPanel
           towerId={towerId}
           onTower={changeTower}
@@ -247,62 +305,7 @@ export default function Building3DScreen() {
           onPick={pickEntity}
         />
         <LayerControls layers={layers} onToggle={(k: LayerKey) => setLayers((l) => ({ ...l, [k]: !l[k] }))} />
-      </aside>
-
-      <div className="b3d-view">
-        <BuildingCanvas view={view} resets={sim.resets} apiRef={api} onSelect={select} onHover={setHover} />
-        {hover && <HoverCard hover={hover} snapshot={snapshot} summaries={summaries} canSee={canSee} />}
-        <div className="b3d-view-tools" role="toolbar" aria-label="View">
-          <button type="button" onClick={() => api.current?.resetCamera()}>
-            Reset view
-          </button>
-          <button type="button" aria-pressed={exploded} onClick={toggleExplode}>
-            {exploded ? 'Close floors' : 'Explode floors'}
-          </button>
-          <button type="button" aria-pressed={isolate} disabled={floor === null} onClick={() => setIsolate((x) => !x)}>
-            Isolate floor
-          </button>
-          {floor !== null && (
-            <button
-              type="button"
-              onClick={() => {
-                setFloor(null);
-                setExploded(false);
-                setIsolate(false);
-                setSelection(null);
-              }}>
-              Clear floor L{floor}
-            </button>
-          )}
-        </div>
-        <p className="b3d-view-hint">Drag to rotate, scroll or pinch to zoom, right-drag to pan. Positions are approximate.</p>
       </div>
-
-      <aside className="b3d-right" aria-label="Details">
-        {sel && (
-          <button type="button" className="b3d-link b3d-back" onClick={() => setSelection(null)}>
-            Back to overview
-          </button>
-        )}
-        {detail}
-      </aside>
-
-      <SimBar
-        mode={mode}
-        onMode={changeMode}
-        t={sim.t}
-        end={SIM_END}
-        playing={sim.playing}
-        speed={sim.speed}
-        onPlay={sim.play}
-        onPause={sim.pause}
-        onStep={sim.step}
-        onReset={sim.reset}
-        onSeek={sim.seek}
-        onSpeed={sim.setSpeed}
-        events={snapshot.events}
-        onEventFloor={goFloor}
-      />
     </div>
   );
 }

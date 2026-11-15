@@ -432,7 +432,7 @@ export class BuildingScene {
     for (const s of this.shafts) {
       const o = s.mesh;
       if (o instanceof CSS2DObject) {
-        o.position.y = top + 0.8;
+        o.position.y = -0.7;
         continue;
       }
       o.scale.y = top;
@@ -472,7 +472,7 @@ export class BuildingScene {
       const edges = new THREE.LineSegments(UNIT_EDGES, line(color, 0.95));
       edges.scale.set(PLATE_W + 0.5, FLOOR_H, PLATE_D + 0.5);
       const tag = label(`${esc(text)}, L${n}`, 'b3d-tag b3d-tag-hazard');
-      tag.position.set(-PLATE_W / 2 - 2.2, 0, PLATE_D / 2);
+      tag.position.set(-PLATE_W / 2 - 2.4, 0, -PLATE_D / 2);
       g.add(vol, edges, tag);
       this.hazards.add(g);
     }
@@ -507,14 +507,20 @@ export class BuildingScene {
         (selected ||
           f.n === 1 ||
           f.n === this.floorsBuilt ||
-          f.n % 5 === 0 ||
+          f.n % 10 === 0 ||
           !!s?.hazard ||
           !!s?.staging ||
           (notable && v.layers.floorStatus));
       const parts = [`<b>L${f.n}</b>`];
-      if (s?.hazard) parts.push('<span class="hz">Fire floor</span>');
+      if (s?.hazard) parts.push('<span class="hz">Fire</span>');
       if (s?.staging) parts.push('<span class="st">Staging</span>');
-      if (v.layers.floorStatus && notable) parts.push(`<span class="fs fs-${state}">${esc(FLOOR_LABEL[state])}</span>`);
+      if (v.layers.floorStatus && notable) {
+        parts.push(
+          selected
+            ? `<span class="fs fs-${state}">${esc(FLOOR_LABEL[state])}</span>`
+            : `<span class="dot fs-${state}" aria-hidden="true"></span>`,
+        );
+      }
       const key = `${show}|${selected}|${parts.join('')}`;
       if (key !== f.labelKey) {
         f.labelKey = key;
